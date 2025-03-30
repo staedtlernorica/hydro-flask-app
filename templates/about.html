@@ -12,17 +12,22 @@
             <ul>
                 <li><a href="{{ url_for('home') }}">Home</a></li>
                 <li><a href="{{ url_for('about') }}">About</a></li>
-                <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                <li><a href="{{ url_for('hydro_viz') }}">Contact</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <section class="about-me">
-            <h1>About Me</h1>
-            <p>Welcome to my About page! Here's a little bit about who I am.</p>
-            <p>I'm a web developer passionate about building amazing user experiences. I love learning new technologies and am always up for new challenges!</p>
-        </section>
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file">
+            <button type="submit">Upload</button>
+          </form>
+        <h3>upload your file here</h3>
+        <!-- <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plotly.com/~chris/1638.embed" height="525" width="100%"></iframe> -->
+
+        <h1>Here's a Plotly graph!</h1>
+        {{ plot_html|safe }}
+        <p>And here's some text after the graph.</p>
     </main>
 
     <footer>
