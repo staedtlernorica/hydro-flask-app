@@ -1,63 +1,69 @@
-
-# # A very simple Flask Hello World app for you to get started with...
-
-# from flask import Flask
-
-# app = Flask(__name__)
-
-# @app.route('/')
-# def hello_world():
-#     return 'Hello from Flask! This is where I will be doing all my Toronto Hydro charting magic'
-
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template
+from flask_wtf import FlaskForm
+from wtforms import MultipleFileField, SubmitField
+from werkzeug.utils import secure_filename
+import os
+from wtforms.validators import InputRequired
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'supersecretkey'
+app.config['UPLOAD_FOLDER'] = 'static/files'
+app.config['ALLOWED_EXTENSIONS'] = {'xml'}
 
-@app.route('/')
+class UploadFileForm(FlaskForm):
+    file = MultipleFileField("Files", validators=[InputRequired()])
+    submit = SubmitField("Upload Files")
+
+@app.route('/', methods=['GET',"POST"])
+@app.route('/home', methods=['GET',"POST"])
 def home():
-    return render_template('index.html')
+    # form = UploadFileForm()
+    # if form.validate_on_submit():
+    #     file = form.file.data # First grab the file
+    #     file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['UPLOAD_FOLDER'],secure_filename(file.filename))) # Then save the file
 
-@app.route('/about')
-def about():
-
-    import plotly.express as px
-    # Create a simple Plotly Express figure (e.g., a scatter plot)
-    df = px.data.iris()  # Using the iris dataset from Plotly
-    fig = px.scatter(df, x='sepal_width', y='sepal_length', color='species')
-
-    # Convert the figure to HTML
-    plot_html = fig.to_html(full_html=False)
-
-    # Render the HTML template and pass the plot HTML to it
-    return render_template('about.html', plot_html=plot_html)
-
-
-@app.route('/hydro-viz')
-def hydro_viz():
-    return render_template('hydro-viz.html')
-
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    # Check if the request has the file part
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-
-    file = request.files['file']
+    #     import xmltodict
+    #     with open(app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
+    #         data_dict = xmltodict.parse(xml_file.read())
+    #         return data_dict
+        
+    #     return "File has been uploaded."
     
-    # If no file is selected
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+    # return render_template('index.html', form=form)
+    form = UploadFileForm()
+    if form.validate_on_submit():
+        
+        import xmltodict, json
+        files_filenames = []
+        merged_files = []
+        for file in form.file.data:
+            file_filename = secure_filename(file.filename)
+            # file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+            # files_filenames.append(file_filename)
 
-    # Read the file contents as text
-    try:
-        file_contents = file.read().decode('utf-8')  # Assuming it's a text file
+            with open(app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
+                data_dict = xmltodict.parse(xml_file.read())
+                # print(data_dict)
+                json_data = json.dumps(data_dict)
 
-        return 'yay got the file'
-        # return jsonify({"file_contents": file_contents})
+                for i in range(4, len(data_dict['feed']['entry'])):
+                    metadata = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:interval']
+                    readings = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:IntervalReading']
+                    day_start = metadata['espi:start']
+
+                    for hourly_readings in readings:       
+                        reading_start = hourly_readings['espi:timePeriod']['espi:start']
+                        reading_value = hourly_readings['espi:value']
+                        merged_files.append({
+                            'day (unix)': day_start,
+                            'hour (unix)': reading_start,
+                            'reading': reading_value
+                        })
+
+            return merged_files
+
     
-    except UnicodeDecodeError:
-        return jsonify({"error": "Unable to decode file"}), 400
-
+    return render_template('index.html', form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)
