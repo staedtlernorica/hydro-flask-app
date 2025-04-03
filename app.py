@@ -38,7 +38,7 @@ def home():
         merged_files = []
         for file in form.file.data:
             file_filename = secure_filename(file.filename)
-            # file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
             # files_filenames.append(file_filename)
 
             with open(app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
@@ -60,7 +60,11 @@ def home():
                             'reading': reading_value
                         })
 
-            return merged_files
+            # return merged_files
+
+        from viz import build_viz
+
+        return build_viz.build_viz(merged_files)
 
     
     return render_template('index.html', form=form)
