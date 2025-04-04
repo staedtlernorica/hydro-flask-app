@@ -43,7 +43,6 @@ def home():
 
             with open(app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
                 data_dict = xmltodict.parse(xml_file.read())
-                # print(data_dict)
                 json_data = json.dumps(data_dict)
 
                 for i in range(4, len(data_dict['feed']['entry'])):

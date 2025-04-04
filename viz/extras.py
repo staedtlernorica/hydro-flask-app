@@ -1,18 +1,22 @@
-def merge_readings(*args):
-    import os
-    files = os.listdir(os.curdir)
-    x = list(filter(lambda x: 'TH_Electric_Usage_' in x, files))
+import os
+print(os.curdir)
+print(os.listdir())
 
-    print(files)
+def merge_readings(*dir):
+    import os
+    files = os.listdir('./static/files/')
+    # files = os.listdir(os.curdir)
+    x = list(filter(lambda x: 'TH_Electric_Usage_' in x, files))
+    # print(args)
+    print('THE FILES ARE ', files)
 
     import xmltodict, json
     merged_readings = []
 
-    for i in x:
-        with open(i) as xml_file:
-            data_dict = xmltodict.parse(xml_file.read())
-
+    with open(f'{dir}/{file_name}') as xml_file:
+        data_dict = xmltodict.parse(xml_file.read())
         json_data = json.dumps(data_dict)
+        
         for i in range(4, len(data_dict['feed']['entry'])):
             metadata = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:interval']
             readings = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:IntervalReading']
@@ -28,11 +32,6 @@ def merge_readings(*args):
                 })
 
     return merged_readings
-
-
-x = merge_readings()
-
-print(x)
 
 def assign_season(date):
     import datetime

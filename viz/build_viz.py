@@ -1,12 +1,7 @@
-import os
-print(os.curdir)
-print(os.getcwd())
-
-
 def build_viz(readings):
+    from .extras import assign_historical_rates, assign_season, assign_rate_plan
     import numpy as np, datetime
     import pandas as pd
-    from .extras import assign_historical_rates, assign_season, assign_rate_plan
 
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
@@ -273,35 +268,38 @@ def build_viz(readings):
         # x=-1
     ))
 
-    fig.show()
-
-    # fig = px.histogram(testa, x=testa['date (ET)'], y='Prices ($)', color='Price Period', barmode='group',)
-    # fig.show()
-
-
-    # fig = px.histogram(testa, x=testa['date (ET)'], y='Prices ($)', color='Price Period', barmode='group', histfunc='sum')
-    # fig.show()
-    import plotly.express as px
-    import pandas as pd, numpy as np, datetime
-
-    dff = pd.DataFrame({
-        'plan': np.repeat(['time', 'tier'],5),
-        'date': np.tile([(pd.date_range(datetime.datetime(2013,1,1),datetime.datetime(2013,1,2)))], 5)[0],
-        'prices': np.tile(np.random.rand(10).round(2), 1),
-        'rates': ['time: low', 'time: low', 'time: mid', 'time: high', 'time: low',
-                'tier: low', 'tier: low', 'tier: low', 'tier: low', 'tier: high']
-    })
-
-    fig = px.bar(dff, 
-                x='plan', 
-                y='prices',
-                facet_col= 'date', 
-                color='rates',  # Color by categorical_A
-                barmode='group',  # Group bars together
+    fig.update_layout(
+        autosize = False,
+        height = 600
     )
-    fig.show()
 
-    return fig
+    fig.show()
+    # return fig
 
 if __name__ == "__main__":
+    # build_viz()
+    import os, xmltodict
+    from extras import merge_readings
+
+
+    print()
+    files = (os.listdir('./static/files/'))
+
+    xml_files = []
+
+    for i in files:
+        with open(f'./static/files/{i}') as xml_file:
+
+            # print(f'./static/files/{i}')
+
+            data_dict = xmltodict.parse(xml_file.read())
+            xml_files.append(data_dict)
+
+    # print(xml_files)
+    # y = merge_readings(os.getcwd())
+    # os.chdir('../..')
+    # print(os.curdir)
+    x = build_viz(xml_files)
+
+
     pass
