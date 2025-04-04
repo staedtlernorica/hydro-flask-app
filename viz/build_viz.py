@@ -108,24 +108,7 @@ def build_viz(readings):
     # nest_asyncio.apply()
 
     import datetime
-    first_timestamp = datetime.datetime.fromtimestamp(df['hour (unix)'].min())
-    last_timestamp = datetime.datetime.fromtimestamp(df['hour (unix)'].max())
 
-    from .historical_weather_data import get_historical_weather
-    wdf = get_historical_weather(first_timestamp, last_timestamp)
-
-    # import sqlite3
-    # weather_db = sqlite3.connect('toronto_weather.db')
-    # wdf = pd.read_sql_query("SELECT * FROM `weather data`", weather_db)
-    # weather_db.close()
-
-    temp_column_header = list(wdf)[9] #grab entry b/c copy/paste the string doesn't work
-    # linearly interpolate missing temp data points, and marks if the data is interpolated or not
-    # in future check for multiple large chunks of interpolated data points (>3 consecutive)
-    temp_col = wdf[temp_column_header]
-    # df['interpolated temp'] = temp_col.isnull()
-    df_tou['temp (C)'] = temp_col.interpolate()
-    df_ulo['temp (C)'] = temp_col.interpolate()
     df_tr = df.copy(deep=True)
     tr_dates = list(oeb_rates['tr'].keys())
     tr_plan = oeb_rates['tr']
@@ -146,7 +129,6 @@ def build_viz(readings):
     df_tr.insert(len(df_tr.columns) - 1, 'Cumulative Usage (kWh)', df_tr.pop('Cumulative Usage (kWh)'))
     df_tr.insert(len(df_tr.columns) - 1, 'TR Threshold', df_tr.pop('TR Threshold'))
 
-    df_tr['temp (C)'] = temp_col.interpolate()
     # longer method but more explicit/clear
     # find id of rows where starting cumulative usages < threshold AND ending cumulative usage > above threshold, ie where readings 
     # started with a lower rate but crosses the TR threshold and ends with a higher rate; then split those readings into two rows: 
@@ -233,6 +215,8 @@ def build_viz(readings):
                     color_discrete_sequence = col_scheme_1,
                     barmode='stack',  
                     labels = {'Plan': ''},  # got from https://stackoverflow.com/a/63439845/6030118
+                    width=1400,
+                    height=450
                     )
     # fig.show()
 
@@ -257,7 +241,7 @@ def build_viz(readings):
                 'x':0.5,
                 'y':1,
                 'yanchor': "top",
-                'xanchor': "center",
+                'xanchor': "center",  
             })
 
     fig.update_layout(legend=dict(
@@ -268,13 +252,26 @@ def build_viz(readings):
         # x=-1
     ))
 
-    fig.update_layout(
-        autosize = False,
-        height = 600
-    )
+    fig.update_layout({
+        'plot_bgcolor': '#f0f0f0',
+        'paper_bgcolor': '#f0f0f0',
+    })
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(showgrid=False)
 
-    fig.show()
-    # return fig
+    config = {'displayModeBar': False}
+
+    fig.show(config = config)
+
+    # print(fig.layout.width)
+
+    # fig = px.histogram(testa, x=testa['date (ET)'], y='Prices ($)', color='Price Period', barmode='group',)
+    # fig.show()
+
+
+    # fig = px.histogram(testa, x=testa['date (ET)'], y='Prices ($)', color='Price Period', barmode='group', histfunc='sum')
+    # fig.show()    
+
 
 if __name__ == "__main__":
     # build_viz()
