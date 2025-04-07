@@ -24,7 +24,7 @@ def build_viz(readings):
     df['hour (ET)'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York').dt.hour
     df['weekend'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York').dt.day_of_week
     df['weekend'] = np.where(df['weekend'] < 5, False, True)
-   
+
     # get list of holiday dates to create a holiday column, as holidays affect TOU and ULO rates
     import holidays
     earliest_year = df['date (ET)'].min().year
@@ -39,7 +39,7 @@ def build_viz(readings):
     df['holiday'] = (df['date (ET)'].isin(holiday_dates))
     move_col = df.pop('usage (kWh)')
     df.insert(len(df.columns), 'usage (kWh)', move_col)         # re-arrange for better readability in upcoming dataframes
-   
+
     # assign TOU and ULO plans and their rates to each hourly reading
     from .oeb_rates import oeb_rates
 
@@ -51,27 +51,27 @@ def build_viz(readings):
     tou_rates = [0,1,2]
     df_tou['TOU Season'] = df_tou['date (ET)'].map(assign_season) #mid/on-peak price period switches on May 1/Nov 1
     tou_conditions = [
-        (df_tou['holiday'] == True) | 
-        (df_tou['weekend'] == True) | 
+        (df_tou['holiday'] == True) |
+        (df_tou['weekend'] == True) |
         df_tou['hour (ET)'].isin([19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]),
-        (df_tou['TOU Season'] == 'summer') & (df_tou['hour (ET)'].isin([7, 8, 9, 10, 17, 18])) | 
+        (df_tou['TOU Season'] == 'summer') & (df_tou['hour (ET)'].isin([7, 8, 9, 10, 17, 18])) |
         (df_tou['TOU Season'] == 'winter') & (df_tou['hour (ET)'].isin([11, 12, 13, 14, 15, 16])),
-        (df_tou['TOU Season'] == 'winter') & (df_tou['hour (ET)'].isin([7, 8, 9, 10, 17, 18])) | 
+        (df_tou['TOU Season'] == 'winter') & (df_tou['hour (ET)'].isin([7, 8, 9, 10, 17, 18])) |
         (df_tou['TOU Season'] == 'summer') & (df_tou['hour (ET)'].isin([11, 12, 13, 14, 15, 16]))
     ]
     df_tou['Price Period'] = np.select(tou_conditions, tou_rates, default=np.nan)
-    df_tou['Rate (c)'] = df_tou.apply(lambda row: row['Rates Plan'][int(row['Price Period'])] 
+    df_tou['Rate (c)'] = df_tou.apply(lambda row: row['Rates Plan'][int(row['Price Period'])]
                             if pd.notna(row['Rates Plan']) else np.nan, axis=1)
     df_tou['Prices (c)'] = df_tou[["Rate (c)"]].multiply(df_tou["usage (kWh)"], axis="index").round(2)
 
     #convert 0/1/2 to off-peak/mid-peak/on-peak for readability
-    df_tou['Price Period'] = np.select([df_tou['Price Period'] == 0, 
-                                            df_tou['Price Period'] == 1, 
-                                            df_tou['Price Period'] == 2], 
-                                            ['tou: off-peak', 
-                                            'tou: mid-peak', 
-                                            'tou: on-peak'], 
-                                            default = np.array(np.nan, dtype='object'))   
+    df_tou['Price Period'] = np.select([df_tou['Price Period'] == 0,
+                                            df_tou['Price Period'] == 1,
+                                            df_tou['Price Period'] == 2],
+                                            ['tou: off-peak',
+                                            'tou: mid-peak',
+                                            'tou: on-peak'],
+                                            default = np.array(np.nan, dtype='object'))
 
     df_ulo = df.copy(deep=True)
     df_ulo = df_ulo[df_ulo['date (ET)'] >= datetime.date(2023, 5, 1)] #ULO rates only took effect on May 1, 2023
@@ -81,29 +81,29 @@ def build_viz(readings):
     df_ulo['Rates Plan'] = df_ulo['Rates Period'].map(oeb_rates['ulo'])
     ulo_rates = [0,1,2,3]
     ulo_conditions = [
-        df_ulo['hour (ET)'].isin([23, 0, 1, 2, 3, 4, 5, 6]), 
-        (df_ulo['weekend'] == True) & (df_ulo['hour (ET)'].isin(range(7, 23))) | 
+        df_ulo['hour (ET)'].isin([23, 0, 1, 2, 3, 4, 5, 6]),
+        (df_ulo['weekend'] == True) & (df_ulo['hour (ET)'].isin(range(7, 23))) |
         (df_ulo['holiday'] == True) & (df_ulo['hour (ET)'].isin(range(7, 23))),
         df_ulo['hour (ET)'].isin([7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23]),
-        df_ulo['hour (ET)'].isin([16, 17, 18, 19, 20])    
+        df_ulo['hour (ET)'].isin([16, 17, 18, 19, 20])
     ]
     df_ulo['Price Period'] = np.select(ulo_conditions, ulo_rates, default=np.nan)
-    df_ulo['Rate (c)'] = df_ulo.apply(lambda row: row['Rates Plan'][int(row['Price Period'])] 
+    df_ulo['Rate (c)'] = df_ulo.apply(lambda row: row['Rates Plan'][int(row['Price Period'])]
                             if pd.notna(row['Rates Plan']) else np.nan,
                             axis=1)
     df_ulo['Prices (c)'] = df_ulo[["Rate (c)"]].multiply(df_ulo["usage (kWh)"], axis="index").round(2)
 
     #convert 0/1/2/3 to ultra-low/off-peak/mid-peak/on-peak for readability
-    df_ulo['Price Period'] = np.select([df_ulo['Price Period'] == 0, 
-                                            df_ulo['Price Period'] == 1, 
-                                            df_ulo['Price Period'] == 2, 
-                                            df_ulo['Price Period'] == 3], 
-                                            ['ulo: ultra-low', 
-                                            'ulo: off-peak', 
-                                            'ulo: mid-peak', 
-                                            'ulo: on-peak'], 
-                                            default = np.array(np.nan, dtype='object'))    
-    
+    df_ulo['Price Period'] = np.select([df_ulo['Price Period'] == 0,
+                                            df_ulo['Price Period'] == 1,
+                                            df_ulo['Price Period'] == 2,
+                                            df_ulo['Price Period'] == 3],
+                                            ['ulo: ultra-low',
+                                            'ulo: off-peak',
+                                            'ulo: mid-peak',
+                                            'ulo: on-peak'],
+                                            default = np.array(np.nan, dtype='object'))
+
     # import nest_asyncio
     # nest_asyncio.apply()
 
@@ -132,12 +132,12 @@ def build_viz(readings):
 
     df_tr['Plan'] = 'TR'
     df_tr['Rates Period'] = df_tr['date (ET)'].apply(lambda x: assign_rate_plan(x, tr_dates))
-    df_tr['Cumulative Usage (kWh)'] = df_tr.groupby([pd.to_datetime(df_tr['date (ET)']).dt.year, 
+    df_tr['Cumulative Usage (kWh)'] = df_tr.groupby([pd.to_datetime(df_tr['date (ET)']).dt.year,
                                     pd.to_datetime(df_tr['date (ET)']).dt.month])['usage (kWh)'].cumsum()
 
-    df_tr['Rates Plan'] = df_tr['Rates Period'].apply(lambda x: tr_plan[x]['prices'] 
+    df_tr['Rates Plan'] = df_tr['Rates Period'].apply(lambda x: tr_plan[x]['prices']
                                         if pd.notna(x) else np.nan)
-    df_tr['TR Threshold'] = df_tr['Rates Period'].apply(lambda x: tr_plan[x]['threshold'] 
+    df_tr['TR Threshold'] = df_tr['Rates Period'].apply(lambda x: tr_plan[x]['threshold']
                                         if pd.notna(x) else np.nan)
     df_tr['Price Period'] = np.where(df_tr['Cumulative Usage (kWh)'] <= df_tr['TR Threshold'], 'tr: lower', 'tr: higher')
     df_tr['Rate (c)'] = df_tr.apply(lambda x: x['Rates Plan'][0] if x['Cumulative Usage (kWh)'] < x['TR Threshold'] else x['Rates Plan'][1], axis=1)
@@ -148,14 +148,14 @@ def build_viz(readings):
 
     df_tr['temp (C)'] = temp_col.interpolate()
     # longer method but more explicit/clear
-    # find id of rows where starting cumulative usages < threshold AND ending cumulative usage > above threshold, ie where readings 
-    # started with a lower rate but crosses the TR threshold and ends with a higher rate; then split those readings into two rows: 
+    # find id of rows where starting cumulative usages < threshold AND ending cumulative usage > above threshold, ie where readings
+    # started with a lower rate but crosses the TR threshold and ends with a higher rate; then split those readings into two rows:
     # - one where ending cumulative usage ends at the threshold (with the lower TR rate)
     # - one where starting cumulative usage starts at the threshold (with the higher TR rate)
     # then re-insert the duplicated rows back into the df_tr, replacing the original crossover readings
     cumu_usages = pd.DataFrame({'date': df_tr['date (ET)'],
-                                'starting cumulative usage': df_tr['Cumulative Usage (kWh)'] - df_tr['usage (kWh)'], 
-                                'ending cumulative usage': df_tr['Cumulative Usage (kWh)'], 
+                                'starting cumulative usage': df_tr['Cumulative Usage (kWh)'] - df_tr['usage (kWh)'],
+                                'ending cumulative usage': df_tr['Cumulative Usage (kWh)'],
                                 'threshold': df_tr['TR Threshold']})
 
     crossover_readings = ((cumu_usages[(cumu_usages['starting cumulative usage'] < cumu_usages['threshold']) &
@@ -181,7 +181,7 @@ def build_viz(readings):
     lower_crossover['Rate (c)'] = lower_crossover['Rates Plan'].apply(lambda x: x[0])
     lower_crossover['Prices (c)'] = lower_crossover[["Rate (c)"]].multiply(lower_crossover["usage (kWh)"], axis="index").round(2)
     lower_crossover['Price Period'] = 'tr: lower'
-    df_tr.iloc[lower_crossover_index] = lower_crossover     
+    df_tr.iloc[lower_crossover_index] = lower_crossover
 
     higher_crossover['usage (kWh)'] = higher_crossover['Cumulative Usage (kWh)'] - higher_crossover['TR Threshold']
     higher_crossover['Rate (c)'] = higher_crossover['Rates Plan'].apply(lambda x: x[1])
@@ -198,7 +198,7 @@ def build_viz(readings):
     dfa = dfa.sort_values(['date (ET)', 'hour (ET)'])
     dfa.reset_index(drop=True, inplace=True)  #reset the index from 1,1,2,2 ... to 1,2,...
 
-    dfa['Cumulative Usage (kWh)'] = dfa.groupby([pd.to_datetime(dfa['date (ET)']).dt.year, 
+    dfa['Cumulative Usage (kWh)'] = dfa.groupby([pd.to_datetime(dfa['date (ET)']).dt.year,
                                             pd.to_datetime(dfa['date (ET)']).dt.month,
                                             dfa['Plan']])['usage (kWh)'].cumsum()
 
@@ -216,22 +216,22 @@ def build_viz(readings):
 
     import plotly.express as px
 
-    testa = test[(test['date (ET)'] >= datetime.date(2024, 7, 1)) & 
+    testa = test[(test['date (ET)'] >= datetime.date(2024, 7, 1)) &
                 (test['date (ET)'] <= datetime.date(2024, 7, 31))]
 
     col_scheme_1 = ["#0aceff", "#0a7cff", "#0230e8", "#d18feb", "#b057d4", "#8aa3b8", "#bac2bc", "#4b4d4b","#282928"]
-    col_scheme_2 = ['#41ff70', '#fcff39', '#d85521', '#8503ff', '#2d037c', '#0cede6', '#1eb73a', '#ffd51a', '#ff0000'] 
+    col_scheme_2 = ['#41ff70', '#fcff39', '#d85521', '#8503ff', '#2d037c', '#0cede6', '#1eb73a', '#ffd51a', '#ff0000']
     alt_scheme = ["teal", "green", "olive", "#F17FB7", "#D14081", "#8BDAE4", "#2E96F0", "#0173FF", "#1E1B76"]
     placeholder_scheme = ["", "", "", "", "", "", "", "", ""]
     # Create a side-by-side bar chart
-    fig = px.histogram(testa, 
-                    x='Plan', 
-                    y='Prices ($)', 
-                    facet_col='date (ET)', 
-                    facet_col_spacing=0.0155, 
-                    color='Price Period', 
+    fig = px.histogram(testa,
+                    x='Plan',
+                    y='Prices ($)',
+                    facet_col='date (ET)',
+                    facet_col_spacing=0.0155,
+                    color='Price Period',
                     color_discrete_sequence = col_scheme_1,
-                    barmode='stack',  
+                    barmode='stack',
                     labels = {'Plan': ''},  # got from https://stackoverflow.com/a/63439845/6030118
                     )
     # fig.show()
@@ -273,8 +273,8 @@ def build_viz(readings):
         height = 600
     )
 
-    fig.show()
-    # return fig
+    # return fig.show()
+    return fig
 
 if __name__ == "__main__":
     # build_viz()

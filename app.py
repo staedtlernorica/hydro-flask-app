@@ -26,22 +26,22 @@ def home():
     #     with open(app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
     #         data_dict = xmltodict.parse(xml_file.read())
     #         return data_dict
-        
+
     #     return "File has been uploaded."
-    
+
     # return render_template('index.html', form=form)
     form = UploadFileForm()
     if form.validate_on_submit():
-        
+
         import xmltodict, json
         files_filenames = []
         merged_files = []
         for file in form.file.data:
             file_filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+            file.save(os.path.join('/home/vuonglon/hydro-flask-app/' + app.config['UPLOAD_FOLDER'], file.filename))
             # files_filenames.append(file_filename)
 
-            with open(app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
+            with open('/home/vuonglon/hydro-flask-app/' + app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
                 data_dict = xmltodict.parse(xml_file.read())
                 json_data = json.dumps(data_dict)
 
@@ -50,7 +50,7 @@ def home():
                     readings = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:IntervalReading']
                     day_start = metadata['espi:start']
 
-                    for hourly_readings in readings:       
+                    for hourly_readings in readings:
                         reading_start = hourly_readings['espi:timePeriod']['espi:start']
                         reading_value = hourly_readings['espi:value']
                         merged_files.append({
@@ -62,10 +62,14 @@ def home():
             # return merged_files
 
         from viz import build_viz
+        import plotly.express as px
 
-        return build_viz.build_viz(merged_files)
+        x = build_viz.build_viz(merged_files)
+        x.show()
 
-    
+        return 'whatsup'
+
+
     return render_template('index.html', form=form)
 
 if __name__ == '__main__':
