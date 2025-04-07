@@ -170,10 +170,10 @@ def build_viz(readings):
     higher_crossover['Prices (c)'] = higher_crossover[["Rate (c)"]].multiply(higher_crossover["usage (kWh)"], axis="index").round(2)
     higher_crossover['Price Period'] = 'tr: higher'
     df_tr.iloc[higher_crossover_index] = higher_crossover
-    print(crossover_readings)
-    print(lower_crossover_index, higher_crossover_index)
-    print(lower_crossover)
-    print(higher_crossover)
+    # print(crossover_readings)
+    # print(lower_crossover_index, higher_crossover_index)
+    # print(lower_crossover)
+    # print(higher_crossover)
 
 
     dfa = pd.concat([df_ulo, df_tou], axis=0)
@@ -230,16 +230,16 @@ def build_viz(readings):
     # fig.for_each_annotation(lambda a: print(dir(a)))
     # fig.for_each_annotation(lambda a: print(type(a)))
 
-    # fig.update_layout(
-    #     xaxis_title='X Axis Label',
-    #     xaxis_title_standoff=90,
-    # )
+    fig.update_layout(
+        yaxis_title='Sum of Daily Prices ($)',
+        # xaxis_title_standoff=90,
+    )
 
     fig.update_layout(
                 title={
                 'text' : 'Energy Plans Price Comparison',
                 'x':0.5,
-                'y':1,
+                'y':0.985,
                 'yanchor': "top",
                 'xanchor': "center",  
             })

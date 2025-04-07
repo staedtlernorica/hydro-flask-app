@@ -2,6 +2,25 @@ import os
 print(os.curdir)
 print(os.listdir())
 
+def parse_xml(xml_file):
+    import xmltodict, json
+    data_dict = xmltodict.parse(xml_file.read())
+    json_data = json.dumps(data_dict)
+
+    for i in range(4, len(data_dict['feed']['entry'])):
+        metadata = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:interval']
+        readings = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:IntervalReading']
+        day_start = metadata['espi:start']
+
+        for hourly_readings in readings:       
+            reading_start = hourly_readings['espi:timePeriod']['espi:start']
+            reading_value = hourly_readings['espi:value']
+            return {
+                'day (unix)': day_start,
+                'hour (unix)': reading_start,
+                'reading': reading_value
+            }
+
 def merge_readings(*dir):
     import os
     files = os.listdir('./static/files/')
