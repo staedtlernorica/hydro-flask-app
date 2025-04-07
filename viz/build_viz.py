@@ -265,6 +265,8 @@ def build_viz(readings):
 
     # print(fig.layout.width)
 
+    return fig.to_html(full_html=False)
+
     # fig = px.histogram(testa, x=testa['date (ET)'], y='Prices ($)', color='Price Period', barmode='group',)
     # fig.show()
 

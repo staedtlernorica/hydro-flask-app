@@ -2,8 +2,10 @@ from flask import Flask, render_template
 from flask_wtf import FlaskForm
 from wtforms import MultipleFileField, SubmitField
 from werkzeug.utils import secure_filename
-import os
+import os, sys
 from wtforms.validators import InputRequired
+import plotly.graph_objs as go
+import plotly.offline as offline
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
@@ -38,10 +40,12 @@ def home():
         merged_files = []
         for file in form.file.data:
             file_filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+            file.save(os.getcwd() + '/' + os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
             # files_filenames.append(file_filename)
 
-            with open(app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
+
+
+            with open(os.getcwd() + '/' + app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
                 data_dict = xmltodict.parse(xml_file.read())
                 json_data = json.dumps(data_dict)
 
@@ -63,7 +67,12 @@ def home():
 
         from viz import build_viz
 
-        return build_viz.build_viz(merged_files)
+        # return build_viz.build_viz(merged_files)
+        plot_html = build_viz.build_viz(merged_files)
+        return render_template("result.html", plot_html=plot_html)
+
+        # Pass the HTML to the template
+        # return render_template('result.html', plot_div=plot_div)
 
     
     return render_template('index.html', form=form)
