@@ -28,19 +28,30 @@ def home():
             file.save(os.getcwd() + '/' + os.path.join(app.config['UPLOAD_FOLDER'], secured_filename))
             # files_filenames.append(file_filename)
 
-            from viz.extras import parse_xml    
+            from viz.extras import parse_xml  
+            import xmltodict, json  
             with open(os.getcwd() + '/' + app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
-                merged_files.append(parse_xml(xml_file))
+                # merged_files.append(parse_xml(xml_file))
+                data_dict = xmltodict.parse(xml_file.read())
+                json_data = json.dumps(data_dict)
+
+                for i in range(4, len(data_dict['feed']['entry'])):
+                    metadata = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:interval']
+                    readings = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:IntervalReading']
+                    day_start = metadata['espi:start']
+
+                    for hourly_readings in readings:       
+                        reading_start = hourly_readings['espi:timePeriod']['espi:start']
+                        reading_value = hourly_readings['espi:value']
+                        merged_files.append({
+                            'day (unix)': day_start,
+                            'hour (unix)': reading_start,
+                            'reading': reading_value
+                        })
 
         from viz.build_viz import build_viz
-
-        # return build_viz.build_viz(merged_files)
         plot_html = build_viz(merged_files)
         return render_template("result.html", plot_html=plot_html)
-
-        # Pass the HTML to the template
-        # return render_template('result.html', plot_div=plot_div)
-
     
     return render_template('index.html', form=form)
 
