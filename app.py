@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
 app.config['UPLOAD_FOLDER'] = 'static/files'
 app.config['ALLOWED_EXTENSIONS'] = {'xml'}
-upload_path = f'{os.getcwd()}/{app.config['UPLOAD_FOLDER']}'
+upload_path = f"{os.getcwd()}/{app.config['UPLOAD_FOLDER']}"
 
 class UploadFileForm(FlaskForm):
     file = MultipleFileField("Files", validators=[InputRequired()])

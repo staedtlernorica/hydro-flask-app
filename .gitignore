@@ -1,3 +1,4 @@
 /.venv
-/static/files
+/static/files/*
+!/static/files/.gitkeep
 __pycache__
