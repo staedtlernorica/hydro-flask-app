@@ -1,2 +1,3 @@
 /.venv
+/static/files
 __pycache__
