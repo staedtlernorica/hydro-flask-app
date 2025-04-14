@@ -261,7 +261,7 @@ def build_viz(readings):
 
     config = {'displayModeBar': False}
 
-    fig.show(config = config)
+    # fig.show(config = config)
 
     # print(fig.layout.width)
 

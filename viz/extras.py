@@ -23,6 +23,23 @@ def merge_files(file_path):
 
     return merged_readings
 
+def parse_xml(xml):
+    merged_readings = []
+    for i in range(4, len(xml['feed']['entry'])):
+                metadata = xml['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:interval']
+                readings = xml['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:IntervalReading']
+                day_start = metadata['espi:start']
+
+                for hourly_readings in readings:       
+                    reading_start = hourly_readings['espi:timePeriod']['espi:start']
+                    reading_value = hourly_readings['espi:value']
+                    merged_readings.append({
+                        'day (unix)': day_start,
+                        'hour (unix)': reading_start,
+                        'reading': reading_value
+                    })
+    return merged_readings
+
 def assign_season(date):
     import datetime
     fake_date = datetime.datetime(2024, date.month,  date.day).date()
