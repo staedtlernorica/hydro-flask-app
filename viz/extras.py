@@ -72,3 +72,14 @@ def assign_rate_plan(date, rates_history):
         return max(before_dates)
     else:
         return np.nan
+    
+def get_month_year(readings):
+    import pandas as pd
+    df = pd.DataFrame(readings)
+    df = df.drop_duplicates()
+    df = df.reset_index(drop=True)
+    df = df.sort_values('hour (unix)')
+    df['date (ET)'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York')
+    df['Year-Month'] = df['date (ET)'].dt.strftime('%Y-%m')
+
+    return list(df['Year-Month'].unique())

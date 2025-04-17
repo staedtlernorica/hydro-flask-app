@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, g
 from flask_wtf import FlaskForm
 from wtforms import MultipleFileField, SubmitField
 from werkzeug.utils import secure_filename
 import os, sys
 from wtforms.validators import InputRequired
-from viz.extras import merge_files, parse_xml
+from viz.extras import merge_files, parse_xml, get_month_year
 from viz.build_viz import build_viz
 
 app = Flask(__name__)
@@ -38,14 +38,38 @@ def home():
 def upload():
     import xmltodict
     xml = xmltodict.parse(request.files['file'].stream.read())
-    parsed_xml = parse_xml(xml)
-    # [print(i) for i in parsed_xml]
-    plot_html = build_viz(parsed_xml)
-    # return render_template("index.html", plot_html=plot_html)
-    
-    # print((plot_html))
 
-    return plot_html
+    db = get_db()
+    cursor = db.execute('SELECT SQLITE_VERSION()')
+    version = cursor.fetchone()
+
+    parsed_xml = parse_xml(xml)
+    plot_html = 0
+    plot_html = build_viz(parsed_xml)
+    month_year = get_month_year(parsed_xml)
+    month_year.append('Last 30 days')
+    # return plot_html
+    return {'date': 'Last 30 days',
+            'month_year': month_year,
+            'plot': plot_html}
+
+# print([print(i) for i in os.environ])
+
+import sqlite3
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(':memory')
+    return g.db
+
+def close_connection(exception):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+
+@app.route('/query', methods=["POST"])
+def query():
+    pass
 
 @app.route('/test', methods=["GET", "POST"])
 def test():

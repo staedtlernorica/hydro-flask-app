@@ -24,6 +24,7 @@ def build_viz(readings):
     df['hour (ET)'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York').dt.hour
     df['weekend'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York').dt.day_of_week
     df['weekend'] = np.where(df['weekend'] < 5, False, True)
+    df['Year-Month'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.strftime('%Y-%m')
    
     # get list of holiday dates to create a holiday column, as holidays affect TOU and ULO rates
     import holidays

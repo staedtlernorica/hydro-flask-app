@@ -7,19 +7,57 @@ submitBtn.onclick = () => {
     formData.append('file', file); // 'file' is the field name expected by the backend
 
     fetch(`${window.location.origin}/upload`, {
-            method: 'POST',
-            body: formData
-        })
+        method: 'POST',
+        body: formData
+    })
+        // .then(res => res.text())
+        // .then(res => {console.log(typeof(res)), console.log(res.text())})
         .then(res => res.text())
-        .then(  
+        .then(
             res => {
+                x = (res)
+                x = JSON.parse(res)
+                console.log(x)
                 chartDiv = document.getElementById('chart')
-                chartDiv.innerHTML = res;
+                chartDiv.innerHTML = x['plot'];
+                
+                $.each(x['month_year'], function (i, value) {
+                    $('#period').append($('<option></option>').val(value).text(value));
+                    const selectElement = document.getElementById('period');
+                    selectElement.selectedIndex = selectElement.options.length - 1;
+                });
+                
                 const scripts = chartDiv.querySelectorAll('script');
-                scripts.forEach((e) => {
-                    eval(e.textContent); // 👈 executes the Plotly.newPlot(...) code
-                })
+                if (scripts) {
+                    scripts.forEach((e) => {
+                        eval(e.textContent); // 👈 executes the Plotly.newPlot(...) code
+                    })
+                }
             }
         )
         .catch(console.error);
 };
+
+const select = document.getElementById('period');
+
+select.addEventListener('change', () => {
+    goToPeriod()
+});
+
+document.getElementById('prevPeriod').addEventListener('click', () => {
+    if (select.selectedIndex > 0) {
+        select.selectedIndex -= 1;
+        goToPeriod()
+    }
+});
+
+document.getElementById('nextPeriod').addEventListener('click', () => {
+    if (select.selectedIndex < select.options.length - 1) {
+        select.selectedIndex += 1;
+        goToPeriod()
+    }
+});
+
+function goToPeriod() {
+    console.log(`going to period ${select.value}`)
+}

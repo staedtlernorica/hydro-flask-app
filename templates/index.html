@@ -1,20 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    
 </head>
+
 <body>
     <h1>Flask File Uploads Tutorial</h1>
 
-    <input type="file" id="xmlFile" name="" accept="xml"  multiple/>
+    <input type="file" id="xmlFile" name="" accept="xml" multiple />
     <input type="submit" id="submitXml">
     {{ plot_html | safe }}
 
     <div id="chart"></div>
+    <div id="chart-control">
+        <button id="prevPeriod">Previous Period</button>
+        <label for="period">Choose period:</label>
+        <select name="period" id="period"></select>
+        <button id="nextPeriod">Next Period</button>
+    </div>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="../static/js/app.js"></script>
 </body>
+
 </html>
