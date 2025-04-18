@@ -42,12 +42,9 @@ def upload():
     parsed_xml = parse_xml(xml)
     df = build_df(parsed_xml)
     
-    conn = sqlite3.connect(':memory:')
+    conn = sqlite3.connect('processed_readings.db')
     df.to_sql('readings', conn, if_exists='replace', index=False)
     
-    
-
-
     month_year_list = get_month_year(parsed_xml)
     # month_year.append('Last 30 days')     #not sure about doing last 30 days anymore
     latest_period = month_year_list[-1]
@@ -57,7 +54,6 @@ def upload():
     rows = cursor.fetchall()
     
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(latest_period,), con=conn)
-    print(queried_df.head(10))
     plot_html = 0
     plot_html = build_viz(queried_df)
     
@@ -69,20 +65,20 @@ def upload():
 # print([print(i) for i in os.environ])
 
 
-
-
-    db = sqlite3.connect(':memory:')
-
-
-
-@app.route('/query', methods=["POST"])
+@app.route('/queryPeriod', methods=["GET", "POST"])
 def query():
+    period = request.args.get('period')
+    print(f"I'm getting value foor {period}")
+    
+    conn = sqlite3.connect('processed_readings.db')
+    queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
+    plot_html = 0
+    plot_html = build_viz(queried_df)
+    
+    # return plot_html
+    return {'plot': plot_html}
+    
     pass
-
-@app.route('/test', methods=["GET", "POST"])
-def test():
-
-    return render_template('test.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
