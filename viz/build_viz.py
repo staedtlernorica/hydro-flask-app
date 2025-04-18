@@ -1,4 +1,4 @@
-def build_viz(readings):
+def build_df(readings):
     from .extras import assign_historical_rates, assign_season, assign_rate_plan
     import numpy as np, datetime
     import pandas as pd
@@ -24,7 +24,7 @@ def build_viz(readings):
     df['hour (ET)'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York').dt.hour
     df['weekend'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York').dt.day_of_week
     df['weekend'] = np.where(df['weekend'] < 5, False, True)
-    df['Year-Month'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.strftime('%Y-%m')
+    df['Year-Month'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York').dt.strftime('%Y-%m')
    
     # get list of holiday dates to create a holiday column, as holidays affect TOU and ULO rates
     import holidays
@@ -191,23 +191,31 @@ def build_viz(readings):
 
     dfa['Prices (c)'] = (dfa['Prices (c)']/100).round(2)
     dfa.rename(columns={'Prices (c)': 'Prices ($)'}, inplace=True)
-    test = dfa[dfa['date (ET)'] >= datetime.date(2024, 7, 1)]
-    test = dfa[dfa['date (ET)'] <= datetime.date(2024, 7, 31)]
-    test.reset_index(drop=True, inplace=True)
-    # test = test[test['date (ET)'] == datetime.date(2023, 7, 3)]
 
+    # now that we have ALL rates plan for TOU/ULO/TR; do this b/c sqlite3 can't handle tuples
+    dfa['Rates Plan'] = dfa['Rates Plan'].astype('str')
+
+    return dfa
+
+    # test = dfa[dfa['date (ET)'] >= datetime.date(2024, 7, 1)]
+    # test = dfa[dfa['date (ET)'] <= datetime.date(2024, 7, 31)]
+    # test.reset_index(drop=True, inplace=True)
+    # # test = test[test['date (ET)'] == datetime.date(2023, 7, 3)]
+
+def build_viz(period_data):
 
     import plotly.express as px
+    import datetime
 
-    testa = test[(test['date (ET)'] >= datetime.date(2024, 7, 1)) & 
-                (test['date (ET)'] <= datetime.date(2024, 7, 31))]
+    # testa = period_data[(period_data['date (ET)'] >= datetime.date(2024, 7, 1)) & 
+    #             (period_data['date (ET)'] <= datetime.date(2024, 7, 31))]
 
     col_scheme_1 = ["#0aceff", "#0a7cff", "#0230e8", "#d18feb", "#b057d4", "#8aa3b8", "#bac2bc", "#4b4d4b","#282928"]
     col_scheme_2 = ['#41ff70', '#fcff39', '#d85521', '#8503ff', '#2d037c', '#0cede6', '#1eb73a', '#ffd51a', '#ff0000'] 
     alt_scheme = ["teal", "green", "olive", "#F17FB7", "#D14081", "#8BDAE4", "#2E96F0", "#0173FF", "#1E1B76"]
     placeholder_scheme = ["", "", "", "", "", "", "", "", ""]
     # Create a side-by-side bar chart
-    fig = px.histogram(testa, 
+    fig = px.histogram(period_data, 
                     x='Plan', 
                     y='Prices ($)', 
                     facet_col='date (ET)', 
