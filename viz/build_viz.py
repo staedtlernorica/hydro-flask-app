@@ -197,23 +197,10 @@ def build_df(readings):
 
     return dfa
 
-    # test = dfa[dfa['date (ET)'] >= datetime.date(2024, 7, 1)]
-    # test = dfa[dfa['date (ET)'] <= datetime.date(2024, 7, 31)]
-    # test.reset_index(drop=True, inplace=True)
-    # # test = test[test['date (ET)'] == datetime.date(2023, 7, 3)]
 
 def build_viz(period_data):
-
     import plotly.express as px
-    import datetime
-
-    # testa = period_data[(period_data['date (ET)'] >= datetime.date(2024, 7, 1)) & 
-    #             (period_data['date (ET)'] <= datetime.date(2024, 7, 31))]
-
-    col_scheme_1 = ["#0aceff", "#0a7cff", "#0230e8", "#d18feb", "#b057d4", "#8aa3b8", "#bac2bc", "#4b4d4b","#282928"]
-    col_scheme_2 = ['#41ff70', '#fcff39', '#d85521', '#8503ff', '#2d037c', '#0cede6', '#1eb73a', '#ffd51a', '#ff0000'] 
-    alt_scheme = ["teal", "green", "olive", "#F17FB7", "#D14081", "#8BDAE4", "#2E96F0", "#0173FF", "#1E1B76"]
-    placeholder_scheme = ["", "", "", "", "", "", "", "", ""]
+    import chart_color_schemes as col_scheme
     # Create a side-by-side bar chart
     fig = px.histogram(period_data, 
                     x='Plan', 
@@ -221,7 +208,7 @@ def build_viz(period_data):
                     facet_col='date (ET)', 
                     facet_col_spacing=0.0155, 
                     color='Price Period', 
-                    color_discrete_sequence = col_scheme_1,
+                    color_discrete_sequence = col_scheme.default,
                     barmode='stack',  
                     labels = {'Plan': ''},  # got from https://stackoverflow.com/a/63439845/6030118
                     width=1400,

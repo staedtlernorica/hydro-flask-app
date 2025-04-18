@@ -49,36 +49,23 @@ def upload():
     # month_year.append('Last 30 days')     #not sure about doing last 30 days anymore
     latest_period = month_year_list[-1]
     
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM readings WHERE [Year-Month] = ?", (latest_period,))
-    rows = cursor.fetchall()
-    
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(latest_period,), con=conn)
     plot_html = 0
     plot_html = build_viz(queried_df)
     
-    # return plot_html
     return {'date': 'Last 30 days',
             'month_year': month_year_list,
             'plot': plot_html}
 
 # print([print(i) for i in os.environ])
 
-
 @app.route('/queryPeriod', methods=["GET", "POST"])
 def query():
-    period = request.args.get('period')
-    print(f"I'm getting value foor {period}")
-    
+    period = request.args.get('period')   
     conn = sqlite3.connect('processed_readings.db')
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
-    plot_html = 0
     plot_html = build_viz(queried_df)
-    
-    # return plot_html
     return {'plot': plot_html}
-    
-    pass
 
 if __name__ == '__main__':
     app.run(debug=True)

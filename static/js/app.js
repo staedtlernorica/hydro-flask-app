@@ -30,7 +30,7 @@ submitBtn.onclick = () => {
                 const scripts = chartDiv.querySelectorAll('script');
                 if (scripts) {
                     scripts.forEach((e) => {
-                        eval(e.textContent); // 👈 executes the Plotly.newPlot(...) code
+                        eval(e.textContent);
                     })
                 }
             }
@@ -59,27 +59,19 @@ document.getElementById('nextPeriod').addEventListener('click', () => {
 });
 
 function goToPeriod() {
-    console.log(`going to period ${select.value}`)
-
     fetch(`${window.location.origin}/queryPeriod?period=${select.value}`, {
         method: 'GET'
-    })
+        })
         .then(res => res.text())
         .then(
             res => {
                 x = JSON.parse(res)
                 chartDiv = document.getElementById('chart')
-                chartDiv.innerHTML = x['plot'];         
-                $.each(x['month_year'], function (i, value) {
-                    $('#period').append($('<option></option>').val(value).text(value));
-                    const selectElement = document.getElementById('period');
-                    selectElement.selectedIndex = selectElement.options.length - 1;
-                });
-                
+                chartDiv.innerHTML = x['plot'];                    
                 const scripts = chartDiv.querySelectorAll('script');
                 if (scripts) {
                     scripts.forEach((e) => {
-                        eval(e.textContent); // 👈 executes the Plotly.newPlot(...) code
+                        eval(e.textContent);
                     })
                 }
             }
