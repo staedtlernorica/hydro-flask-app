@@ -194,21 +194,45 @@ def build_df(readings):
 
     # now that we have ALL rates plan for TOU/ULO/TR; do this b/c sqlite3 can't handle tuples
     dfa['Rates Plan'] = dfa['Rates Plan'].astype('str')
-
+    
+    # for testing purposes to obscure TOU/ULO/TR values
+    # dfa['Price Period'].replace({
+    #     'tou: off-peak': "low 1",
+    #     'tou: mid-peak': "low 2",
+    #     'tou: on-peak': "low 3",
+    #     'ulo: ultra-low': "mid 1",
+    #     'ulo: off-peak': "mid 2",
+    #     'ulo: mid-peak': "mid 3",
+    #     'ulo: on-peak': "mid 4",
+    #     'tr: lower': "high 1",
+    #     'tr: higher': "high 2",
+    # }, inplace = True)
+    
     return dfa
 
 
 def build_viz(period_data):
     import plotly.express as px
-    import chart_color_schemes as col_scheme
+    from .chart_color_schemes import color_schemes
     # Create a side-by-side bar chart
+    # Price Period values
+    pp_values = ['tou: off-peak', 'tou: mid-peak', 'tou: on-peak',
+        'ulo: ultra-low', 'ulo: off-peak', 'ulo: mid-peak', 'ulo: on-peak',
+        'tr: lower', 'tr: higher',]
+    
+    col = ['red', 'orange', 'brown',
+           'blue', 'navy', 'green', 'olive',
+           'grey', 'black']
+    
     fig = px.histogram(period_data, 
                     x='Plan', 
                     y='Prices ($)', 
                     facet_col='date (ET)', 
                     facet_col_spacing=0.0155, 
                     color='Price Period', 
-                    color_discrete_sequence = col_scheme.default,
+                    # color_discrete_sequence = color_schemes['default'],
+                    # color_discrete_map = dict(zip(pp_values, color_schemes['default'])),
+                    color_discrete_map = dict(zip(pp_values, col)),
                     barmode='stack',  
                     labels = {'Plan': ''},  # got from https://stackoverflow.com/a/63439845/6030118
                     width=1400,
