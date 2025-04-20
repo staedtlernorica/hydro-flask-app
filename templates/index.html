@@ -26,61 +26,20 @@
 
 
     <h2>Select 9 Colors</h2>
-    <div class="color-picker-container">
-        <!-- Create 9 color pickers -->
-        <div class="color-block">
-            <label for="color1">Color 1</label>
-            <input type="color" id="color1" name="color1" value="#ff0000">
+    {% print(2) %}
+    {% print(colors) %}
+    {% for i in range(1,10) %}
+        <div class="card">
+            <!-- <h2>Card {{i}}</h2>
+            <p>This is card number {{i}}</p> -->
+            <div class="color-block">
+                <label for="color{{i}}">Color {{i}}</label>
+                <input type="color" class="colorSelector" name="color{{i}}" value="{{colors[i - 1]}}">
+            </div>
         </div>
-        <div class="color-block">
-            <label for="color2">Color 2</label>
-            <input type="color" id="color2" name="color2" value="#00ff00">
-        </div>
-        <div class="color-block">
-            <label for="color3">Color 3</label>
-            <input type="color" id="color3" name="color3" value="#0000ff">
-        </div>
-        <div class="color-block">
-            <label for="color4">Color 4</label>
-            <input type="color" id="color4" name="color4" value="#ffff00">
-        </div>
-        <div class="color-block">
-            <label for="color5">Color 5</label>
-            <input type="color" id="color5" name="color5" value="#00ffff">
-        </div>
-        <div class="color-block">
-            <label for="color6">Color 6</label>
-            <input type="color" id="color6" name="color6" value="#ff00ff">
-        </div>
-        <div class="color-block">
-            <label for="color7">Color 7</label>
-            <input type="color" id="color7" name="color7" value="#ffffff">
-        </div>
-        <div class="color-block">
-            <label for="color8">Color 8</label>
-            <input type="color" id="color8" name="color8" value="#000000">
-        </div>
-        <div class="color-block">
-            <label for="color9">Color 9</label>
-            <input type="color" id="color9" name="color9" value="#808080">
-        </div>
-    </div>
-
+    {% endfor %}
     <br>
     <button onclick="changeColorScheme()">Choose color scheme</button>
-
-    <pre id="output"></pre>
-
-    <script>
-        function changeColorScheme() {
-            const colors = [];
-            for (let i = 1; i <= 9; i++) {
-                const colorValue = document.getElementById(`color${i}`).value;
-                colors.push(colorValue);
-            }
-            document.getElementById('output').textContent = `Selected Colors:\n${colors.join('\n')}`;
-        }
-    </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="../static/js/app.js"></script>

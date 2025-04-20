@@ -23,17 +23,16 @@ class UploadFileForm(FlaskForm):
 def home():
     # form = UploadFileForm()
     # if form.validate_on_submit():
-        
     #     for file in form.file.data:
     #         secured_filename = secure_filename(file.filename)
     #         file.save(f'{upload_path}/{secured_filename}')
     #         merged_files = merge_files(upload_path)
-
     #     plot_html = build_viz(merged_files)
     #     # return render_template("result.html", plot_html=plot_html)
-    
     # return render_template('index.html', form=form)
-    return render_template('index.html')
+    from viz import chart_color_schemes
+    default_colors = chart_color_schemes.color_schemes['default']
+    return render_template('index.html', colors = default_colors)
 
 @app.route('/upload', methods=["POST"])
 def upload():
@@ -66,6 +65,21 @@ def query():
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
     plot_html = build_viz(queried_df)
     return {'plot': plot_html}
+
+@app.after_request
+def after_request_func(response):
+    print("g contents:", vars(g))
+    return response
+
+@app.route('/color', methods=["GET", "POST"])
+def color():
+
+    print('the request is', request.get_json())
+
+    g.chartColors = request.get_json().get('colors')
+    return ''
+    # g.color = 
+    pass
 
 if __name__ == '__main__':
     app.run(debug=True)

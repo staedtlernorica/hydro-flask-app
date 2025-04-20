@@ -211,7 +211,7 @@ def build_df(readings):
     return dfa
 
 
-def build_viz(period_data):
+def build_viz(period_data, *args):
     import plotly.express as px
     from .chart_color_schemes import color_schemes
     # Create a side-by-side bar chart
