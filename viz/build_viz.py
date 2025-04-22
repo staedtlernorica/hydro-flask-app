@@ -211,9 +211,8 @@ def build_df(readings):
     return dfa
 
 
-def build_viz(period_data, *args):
+def build_viz(period_data, **kwargs):
     import plotly.express as px
-    from .chart_color_schemes import color_schemes
     # Create a side-by-side bar chart
     # Price Period values
     pp_values = ['tou: off-peak', 'tou: mid-peak', 'tou: on-peak',
@@ -232,10 +231,10 @@ def build_viz(period_data, *args):
                     color='Price Period', 
                     # color_discrete_sequence = color_schemes['default'],
                     # color_discrete_map = dict(zip(pp_values, color_schemes['default'])),
-                    color_discrete_map = dict(zip(pp_values, col)),
+                    color_discrete_map = dict(zip(pp_values, kwargs['colorScheme'])),
                     barmode='stack',  
                     labels = {'Plan': ''},  # got from https://stackoverflow.com/a/63439845/6030118
-                    width=1400,
+                    width=1300,
                     height=450
                     )
     # fig.show()

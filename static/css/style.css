@@ -1,7 +1,4 @@
-/* Reset some default styles */
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
@@ -37,6 +34,19 @@ nav ul li a:hover {
     text-decoration: underline;
 }
 
+.wrapper {
+    margin-right: auto;
+    margin-left: auto;
+
+    max-width: 1400px;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+#intro{
+    display: flex;
+}
+
 main {
     padding: 20px;
     text-align: center;
@@ -54,4 +64,93 @@ footer {
 
 h1 {
     color: #333;
+    margin-right: 25px;
+    min-width: 220px;
+    width: 400px;
+}
+
+h3{
+    margin-bottom: 0;
+}
+
+p{
+    margin-top: 0;
+}
+
+.content-wrapper {
+    font-family: Arial, sans-serif;
+}
+
+.more-text {
+    max-height: 500px;
+    opacity: 1;
+    overflow: hidden;
+    transition: opacity 0.5s ease, max-height 0.5s ease;
+}
+
+.more-text.hide {
+    max-height: 0;
+    opacity: 0;
+}
+
+.preview {
+    position: relative;
+}
+
+.preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1.5em;
+    background: linear-gradient(to bottom, transparent, white);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+.preview.collapsed::after {
+    opacity: 0.6;
+}
+
+.toggle-btn {
+    color: blue;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: underline;
+    display: inline-block;
+}
+
+.toggle-container {
+    text-align: right;
+    margin-top: 5px;
+}
+
+
+#data-source-wrapper{
+    display: flex;
+    /* flex: 1 2; */
+}
+
+#data-source{
+    display: flex;
+}
+
+#data-source div{
+    margin: 0 40px 0 30px;
+    display: flex;
+    /* flex-direction: column; */
+    align-items: center;
+}
+
+#chart{
+    margin-top: 250px;
+}
+
+#chart-control{
+    text-align: center;
+    display: flex;
+    justify-content: space-around;
+    padding: 0 30%;
 }

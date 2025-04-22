@@ -1,3 +1,16 @@
+const moreText = document.getElementById("moreText");
+const preview = document.getElementById("preview");
+const btn = document.querySelector(".toggle-btn");
+
+function toggleText() {
+  moreText.classList.toggle("hide");
+  preview.classList.toggle("collapsed");
+
+  const isHidden = moreText.classList.contains("hide");
+  btn.textContent = isHidden ? "See More" : "See Less";
+}
+
+
 submitBtn = document.querySelector('#submitXml')
 xmlFile = document.querySelector('#xmlFile')
 

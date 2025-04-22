@@ -5,30 +5,74 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/style.css">
     <title>Home</title>
 
 </head>
 
 <body>
-    <h1>Flask File Uploads Tutorial</h1>
+    <div class="wrapper">
+        <section id="intro">
+            <h1>Ontario Hydro Plan Comparison</h1>
+            <div class="content-wrapper">
+                <div class="preview" id="preview">
+                    <h3>Quickstart</h3>
+                    <p>
+                        On this page, you can upload your Green Button Data or click the <b><em>Submit Sample
+                                Data</em></b>
+                        button to
+                        see a breakdown of how much each electricity pricing plan costs based on your daily energy
+                        usage.
+                        <b><u>No uploaded data is saved to maintain privacy</u></b>!
+                    <div class="more-text" id="moreText">
+                        You can get your Green Button data from your hydro provider. For example, I obtained mine from
+                        this <a href="https://www.torontohydro.com/for-home/green-button">Toronto Hydro page</a>.
+                        Further
+                        information on the electricity pricing plans can be found
+                        <a href="https://www.oeb.ca/consumer-information-and-protection/electricity-rates">here</a> on
+                        the Ontario Electricity Board website.
+                        </p>
+                    </div>
+                </div>
+                <div class="toggle-container">
+                    <span class="toggle-btn" onclick="toggleText()">See Less</span>
+                </div>
+            </div>
+        </section>
 
-    <input type="file" id="xmlFile" name="" accept="xml" multiple />
-    <input type="submit" id="submitXml">
-    {{ plot_html | safe }}
 
-    <div id="chart"></div>
-    <div id="chart-control">
-        <button id="prevPeriod">Previous Period</button>
-        <label for="period">Choose period:</label>
-        <select name="period" id="period"></select>
-        <button id="nextPeriod">Next Period</button>
-    </div>
+        <!-- <br> -->
+        <div id="data-source-wrapper">
+            <h4>Upload your Green Button Data</h4>
+            <div id="data-source">
+                <div>
+                    <input type="file" id="xmlFile" name="" accept="xml" multiple />
+                    <input type="submit" id="submitXml" value="Submit File(s)">
+                </div>
+                <h4>or</h4>
+                <div>
+                    <input type="button" value="Submit Sample Data">
+                </div>
+                <!-- <br> -->
+            </div>
+        </div>
+        {{ plot_html | safe }}
+
+        <div id="chart"></div>
+        <div id="chart-control">
+            <button id="prevPeriod">Previous Period</button>
+            <div id="period-selector">
+                <label for="period">Choose period:</label>
+                <select name="period" id="period"></select>
+            </div>
+            <button id="nextPeriod">Next Period</button>
+        </div>
 
 
-    <h2>Select 9 Colors</h2>
-    {% print(2) %}
-    {% print(colors) %}
-    {% for i in range(1,10) %}
+        <h2>Select 9 Colors</h2>
+        <!-- {% print(2) %}
+        {% print(colors) %} -->
+        {% for i in range(1,10) %}
         <div class="card">
             <!-- <h2>Card {{i}}</h2>
             <p>This is card number {{i}}</p> -->
@@ -37,12 +81,13 @@
                 <input type="color" class="colorSelector" name="color{{i}}" value="{{colors[i - 1]}}">
             </div>
         </div>
-    {% endfor %}
-    <br>
-    <button onclick="changeColorScheme()">Choose color scheme</button>
+        {% endfor %}
+        <br>
+        <button onclick="changeColorScheme()">Choose color scheme</button>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="../static/js/app.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="../static/js/app.js"></script>
+    </div>
 </body>
 
 </html>

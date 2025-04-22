@@ -2,11 +2,12 @@ from flask import Flask, render_template, request, jsonify, g
 from flask_wtf import FlaskForm
 from wtforms import MultipleFileField, SubmitField
 from werkzeug.utils import secure_filename
-import os, sys, sqlite3
+import os, sqlite3
 from wtforms.validators import InputRequired
 from viz.extras import merge_files, parse_xml, get_month_year
 from viz.build_viz import build_df, build_viz
 import pandas as pd
+from viz import chart_color_schemes as col_schemes
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
@@ -30,8 +31,7 @@ def home():
     #     plot_html = build_viz(merged_files)
     #     # return render_template("result.html", plot_html=plot_html)
     # return render_template('index.html', form=form)
-    from viz import chart_color_schemes
-    default_colors = chart_color_schemes.color_schemes['default']
+    default_colors = col_schemes.schemes['default']
     return render_template('index.html', colors = default_colors)
 
 @app.route('/upload', methods=["POST"])
@@ -39,19 +39,13 @@ def upload():
     import xmltodict
     xml = xmltodict.parse(request.files['file'].stream.read())
     parsed_xml = parse_xml(xml)
-    df = build_df(parsed_xml)
-    
+    df = build_df(parsed_xml) 
     conn = sqlite3.connect('processed_readings.db')
-    df.to_sql('readings', conn, if_exists='replace', index=False)
+    df.to_sql('readings', conn, if_exists='replace', index=False)\
     
     month_year_list = get_month_year(parsed_xml)
-    # month_year.append('Last 30 days')     #not sure about doing last 30 days anymore
     latest_period = month_year_list[-1]
-    
-    queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(latest_period,), con=conn)
-    plot_html = 0
-    plot_html = build_viz(queried_df)
-    
+    plot_html = query(queryPeriod = latest_period, func = True)
     return {'date': 'Last 30 days',
             'month_year': month_year_list,
             'plot': plot_html}
@@ -59,11 +53,14 @@ def upload():
 # print([print(i) for i in os.environ])
 
 @app.route('/queryPeriod', methods=["GET", "POST"])
-def query():
-    period = request.args.get('period')   
+def query(queryPeriod = None, func = False, **color):
+    period = queryPeriod or request.args.get('period')  
+    color = col_schemes.schemes['default']
     conn = sqlite3.connect('processed_readings.db')
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
-    plot_html = build_viz(queried_df)
+    plot_html = build_viz(queried_df, colorScheme=color)
+    if func:
+        return plot_html
     return {'plot': plot_html}
 
 @app.after_request
@@ -73,9 +70,7 @@ def after_request_func(response):
 
 @app.route('/color', methods=["GET", "POST"])
 def color():
-
     print('the request is', request.get_json())
-
     g.chartColors = request.get_json().get('colors')
     return ''
     # g.color = 
