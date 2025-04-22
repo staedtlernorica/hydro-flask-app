@@ -18,7 +18,7 @@
                 <div class="preview" id="preview">
                     <h3>Quickstart</h3>
                     <p>
-                        On this page, you can upload your Green Button Data or click the <b><em>Submit Sample
+                        On this page, you can upload your Green Button Data or click the <b><em>Use Sample
                                 Data</em></b>
                         button to
                         see a breakdown of how much each electricity pricing plan costs based on your daily energy
@@ -47,18 +47,18 @@
             <div id="data-source">
                 <div>
                     <input type="file" id="xmlFile" name="" accept="xml" multiple />
-                    <input type="submit" id="submitXml" value="Submit File(s)">
+                    <input type="submit" id="submitXml" class="user-data" value="Submit File(s)">
                 </div>
                 <h4>or</h4>
                 <div>
-                    <input type="button" value="Submit Sample Data">
+                    <input type="button" id="sampleXml" class="sample-data" value="Use Sample Data">
                 </div>
                 <!-- <br> -->
             </div>
         </div>
         {{ plot_html | safe }}
 
-        <div id="chart"></div>
+        <div id="chart" class="no-chart"></div>
         <div id="chart-control">
             <button id="prevPeriod">Previous Period</button>
             <div id="period-selector">

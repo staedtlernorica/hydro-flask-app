@@ -144,8 +144,13 @@ p{
     align-items: center;
 }
 
-#chart{
+#chart.no-chart{
     margin-top: 250px;
+}
+
+#chart{
+    text-align: center;
+    margin: 25px;
 }
 
 #chart-control{

@@ -7,3 +7,5 @@ problem where month that doesn't have any tr:higher entry won't show the legend
 uploading one file, THEN another file causes dates to appear out of chronological order (but true to order they were uploaded in)
 - eg 2024-02/2024-03/2024-04, 2023-12/2024-01/2024-02
 - possibly have dates managed in session/server side and re-index after every upload
+
+handle upload 1, then uploading 2 (vs expecting uploading 1 and 2 at the same time)

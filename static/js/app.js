@@ -3,53 +3,59 @@ const preview = document.getElementById("preview");
 const btn = document.querySelector(".toggle-btn");
 
 function toggleText() {
-  moreText.classList.toggle("hide");
-  preview.classList.toggle("collapsed");
+    moreText.classList.toggle("hide");
+    preview.classList.toggle("collapsed");
 
-  const isHidden = moreText.classList.contains("hide");
-  btn.textContent = isHidden ? "See More" : "See Less";
+    const isHidden = moreText.classList.contains("hide");
+    btn.textContent = isHidden ? "See More" : "See Less";
 }
 
-
-submitBtn = document.querySelector('#submitXml')
 xmlFile = document.querySelector('#xmlFile')
+xmlSampleFile = '../../sample xml/output.xml'
 
-submitBtn.onclick = () => {
-    const file = xmlFile.files[0];
-    const formData = new FormData();
-    formData.append('file', file); // 'file' is the field name expected by the backend
+function handleUploadClick(btnType) {
+    let uploadUrl = `${window.location.origin}/upload?dataSrc=sample`;  //default to use sample data 
+    let formData
+    if (btnType === 'submit') {
+        const file = xmlFile.files[0];
+        uploadUrl = `${window.location.origin}/upload?dataSrc=submit`;
+        formData = new FormData();
+        formData.append('file', file); // 'file' is the expected field name
+    }
 
-    fetch(`${window.location.origin}/upload`, {
+    fetch(uploadUrl, {
         method: 'POST',
         body: formData
     })
-        // .then(res => res.text())
-        // .then(res => {console.log(typeof(res)), console.log(res.text())})
         .then(res => res.text())
-        .then(
-            res => {
-                x = (res)
-                x = JSON.parse(res)
-                console.log(x)
-                chartDiv = document.getElementById('chart')
-                chartDiv.innerHTML = x['plot'];
+        .then(res => {
+            let parsed = JSON.parse(res);
+            const chartDiv = document.getElementById('chart');
+            chartDiv.className = ''
+            chartDiv.innerHTML = parsed['plot'];
+            const periodSelect = document.getElementById('period');
+            periodSelect.innerHTML = ''; // clear previous options if any
 
-                $.each(x['month_year'], function (i, value) {
-                    $('#period').append($('<option></option>').val(value).text(value));
-                    const selectElement = document.getElementById('period');
-                    selectElement.selectedIndex = selectElement.options.length - 1;
-                });
+            parsed['month_year'].forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                periodSelect.appendChild(option);
+            });
 
-                const scripts = chartDiv.querySelectorAll('script');
-                if (scripts) {
-                    scripts.forEach((e) => {
-                        eval(e.textContent);
-                    })
-                }
-            }
-        )
+            periodSelect.selectedIndex = periodSelect.options.length - 1;
+
+            const scripts = chartDiv.querySelectorAll('script');
+            scripts.forEach(script => eval(script.textContent));
+        })
         .catch(console.error);
-};
+}
+
+submitBtn = document.querySelector('#submitXml')
+sampleBtn = document.querySelector('#sampleXml')
+submitBtn.onclick = () => handleUploadClick('submit');
+sampleBtn.onclick = () => handleUploadClick('sample');
+
 
 const select = document.getElementById('period');
 select.addEventListener('change', () => {

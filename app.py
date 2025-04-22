@@ -34,14 +34,20 @@ def home():
     default_colors = col_schemes.schemes['default']
     return render_template('index.html', colors = default_colors)
 
+
 @app.route('/upload', methods=["POST"])
 def upload():
+    dataSrc = request.args.get('dataSrc')
     import xmltodict
-    xml = xmltodict.parse(request.files['file'].stream.read())
+    if dataSrc == 'submit':
+        xml = xmltodict.parse(request.files['file'].stream.read())
+    elif dataSrc == 'sample':
+        with open('./sample xml/sample.XML', 'r', encoding='utf-8') as file:
+            xml = xmltodict.parse(file.read())
     parsed_xml = parse_xml(xml)
     df = build_df(parsed_xml) 
     conn = sqlite3.connect('processed_readings.db')
-    df.to_sql('readings', conn, if_exists='replace', index=False)\
+    df.to_sql('readings', conn, if_exists='replace', index=False)
     
     month_year_list = get_month_year(parsed_xml)
     latest_period = month_year_list[-1]
