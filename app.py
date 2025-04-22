@@ -42,7 +42,7 @@ def upload():
     if dataSrc == 'submit':
         xml = xmltodict.parse(request.files['file'].stream.read())
     elif dataSrc == 'sample':
-        with open(f'{os.getcwd()}/sample xml/sample.XML', 'r', encoding='utf-8') as file:
+        with open(f'{os.getcwd()}/sample xml/sample.xml', 'r', encoding='utf-8') as file:
             xml = xmltodict.parse(file.read())
     parsed_xml = parse_xml(xml)
     df = build_df(parsed_xml) 
