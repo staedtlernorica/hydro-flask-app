@@ -1,5 +1,6 @@
 const LOADING_ANIMATION = false
 const LOADER = document.getElementById("loader")
+LOADER.style.display = 'none'         //have it upfront for testing purposes
 
 const moreText = document.getElementById("moreText");
 const preview = document.getElementById("preview");
@@ -17,7 +18,7 @@ xmlFile = document.querySelector('#xmlFile')
 xmlSampleFile = '../../sample xml/output.xml'
 
 function handleUploadClick(btnType) {
-    LOADER.style.visibility = 'visible'
+    LOADER.style.display = 'block'
     let uploadUrl = `${window.location.origin}/upload?dataSrc=sample`;  //default to use sample data 
     let formData
     if (btnType === 'submit') {
@@ -52,7 +53,7 @@ function handleUploadClick(btnType) {
 
                 const scripts = chartDiv.querySelectorAll('script');
                 scripts.forEach(script => eval(script.textContent));
-                LOADER.style.visibility = 'hidden'
+                LOADER.style.display = 'none'
             })
         .catch(console.error);
 }
@@ -83,7 +84,7 @@ document.getElementById('nextPeriod').addEventListener('click', () => {
 });
 
 function goToPeriod() {
-    LOADER.style.visibility = 'visible'
+    LOADER.style.display = 'block'
     fetch(`${window.location.origin}/queryPeriod?period=${select.value}`, {
         method: 'GET'
     })
@@ -99,7 +100,7 @@ function goToPeriod() {
                         eval(e.textContent);
                     })
                 }
-                LOADER.style.visibility = 'hidden'
+                LOADER.style.display = 'none'
             }
         )
         .catch(console.error);
@@ -113,7 +114,7 @@ function changeColorScheme() {
     })
     console.log(colors)
 
-    LOADER.style.visibility = 'visible'
+    LOADER.style.display = 'block'
     fetch(`${window.location.origin}/color`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -134,7 +135,7 @@ function changeColorScheme() {
                         eval(e.textContent);
                     })
                 }
-                LOADER.style.visibility = 'hidden'
+                LOADER.style.display = 'none'
             }
         )
         .catch(console.error);

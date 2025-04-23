@@ -127,10 +127,8 @@ p{
     margin-top: 5px;
 }
 
-
 #data-source-wrapper{
     display: flex;
-    /* flex: 1 2; */
 }
 
 #data-source{
@@ -140,16 +138,17 @@ p{
 #data-source div{
     margin: 0 40px 0 30px;
     display: flex;
-    /* flex-direction: column; */
     align-items: center;
 }
 
 #chart.no-chart{
-    margin-top: 250px;
+    /* margin-top: 150px;
+    margin-bottom: 150px; */
 }
 
 #chart{
-    text-align: center;
+    display: flex;
+    justify-content: center;
     margin: 25px;
 }
 
@@ -207,6 +206,14 @@ input[type="color" i]{
     }
 }
 
+#loader-container{
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-wrap: wrap;
+}
+
 
 #loader {
     border: 16px solid #005d555a; /* Light grey */
@@ -216,7 +223,6 @@ input[type="color" i]{
     height: 120px;
     animation: spin 2s linear infinite;
     text-align: center;
-    visibility: hidden;
   }
   
   @keyframes spin {
