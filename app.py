@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, g
+from flask import Flask, render_template, request, jsonify, g, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import MultipleFileField, SubmitField
 from werkzeug.utils import secure_filename
@@ -51,7 +51,7 @@ def upload():
     
     month_year_list = get_month_year(parsed_xml)
     latest_period = month_year_list[-1]
-    plot_html = query(queryPeriod = latest_period, func = True)
+    plot_html = queryPeriod(queryPeriod = latest_period, func = True)
     return {'date': 'Last 30 days',
             'month_year': month_year_list,
             'plot': plot_html}
@@ -59,28 +59,38 @@ def upload():
 # print([print(i) for i in os.environ])
 
 @app.route('/queryPeriod', methods=["GET", "POST"])
-def query(queryPeriod = None, func = False, **color):
+def queryPeriod(queryPeriod = None, func = False, **kwargs):
     period = queryPeriod or request.args.get('period')  
-    color = col_schemes.schemes['default']
+    # color = user_color or request.args.get('colorScheme') or col_schemes.schemes['default']
+    default_color = col_schemes.schemes['default']
     conn = sqlite3.connect('processed_readings.db')
+
+    color = kwargs.get('user_color', default_color)
+    # print(request.args.get('colorScheme'))
+    print(col_schemes.schemes['default'])
+
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
     plot_html = build_viz(queried_df, colorScheme=color)
     if func:
         return plot_html
     return {'plot': plot_html}
 
-@app.after_request
-def after_request_func(response):
-    print("g contents:", vars(g))
-    return response
-
 @app.route('/color', methods=["GET", "POST"])
 def color():
-    print('the request is', request.get_json())
-    g.chartColors = request.get_json().get('colors')
-    return ''
+    # print('the request is', request.get_json())
+    # g.chartColors = request.get_json().get('colors')
     # g.color = 
-    pass
+    args = request.get_json()
+    colors = args['colors']
+    period = args['currentPeriod']
+    # print('colirs is', colors)
+    # print('pariod is', period)
+    plot_html = queryPeriod(queryPeriod = period, func = True, user_color = colors)
+    return {'plot': plot_html}
+
+@app.route('/test', methods=["GET", "POST"])
+def test():
+    return 'test is success'
 
 if __name__ == '__main__':
     app.run(debug=True)

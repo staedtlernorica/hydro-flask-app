@@ -109,13 +109,22 @@ function changeColorScheme() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            colors: colors
+            colors: colors,
+            currentPeriod: select.value
         })
     })
         .then(res => res.text())
         .then(
             res => {
-
+                x = JSON.parse(res)
+                chartDiv = document.getElementById('chart')
+                chartDiv.innerHTML = x['plot'];
+                const scripts = chartDiv.querySelectorAll('script');
+                if (scripts) {
+                    scripts.forEach((e) => {
+                        eval(e.textContent);
+                    })
+                }
             }
         )
         .catch(console.error);

@@ -68,22 +68,32 @@
             <button id="nextPeriod">Next Period</button>
         </div>
 
-
-        <h2>Select 9 Colors</h2>
-        <!-- {% print(2) %}
-        {% print(colors) %} -->
-        {% for i in range(1,10) %}
-        <div class="card">
-            <!-- <h2>Card {{i}}</h2>
-            <p>This is card number {{i}}</p> -->
-            <div class="color-block">
-                <label for="color{{i}}">Color {{i}}</label>
-                <input type="color" class="colorSelector" name="color{{i}}" value="{{colors[i - 1]}}">
+        <div id="color-setup">
+            <div id="color-selection">
+                <div id="color-control">
+                    <h4>Choose color for electricity plan and period:</h4>
+                    <button onclick="changeColorScheme()">Submit Color Scheme</button>
+                </div>
+                <div class="tou">
+                    <p>TOU: Off-Peak, Mid-Peak, On-Peak </p>
+                    {% for i in range(1,4) %}
+                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors[i - 1]}}">
+                    {% endfor %}
+                </div>
+                <div class="ulo">
+                    <p>ULO: Ultra Low Overnight, Weekend Off-Peak, Mid-Peak, On-Peak</p>
+                    {% for i in range(4,8) %}
+                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors[i - 1]}}">
+                    {% endfor %}
+                </div>
+                <div class="tr">
+                    <p>TR: Tier 1, Tier 2</p>
+                    {% for i in range(8,10) %}
+                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors[i - 1]}}">
+                    {% endfor %}
+                </div>
             </div>
         </div>
-        {% endfor %}
-        <br>
-        <button onclick="changeColorScheme()">Choose color scheme</button>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script src="../static/js/app.js"></script>

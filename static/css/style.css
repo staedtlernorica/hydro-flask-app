@@ -159,3 +159,50 @@ p{
     justify-content: space-around;
     padding: 0 30%;
 }
+
+
+input[type="color" i]{
+    padding: 0;
+    border: 0;
+    width: 50px;
+    height: 50px;
+    margin: 0 5px;
+}
+
+#color-setup{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 55px;
+
+    h4{
+        margin: 0;
+        min-width: 495px;
+    }
+
+    button{
+        max-width: 150px;
+        max-height: 25px;
+    }
+}
+
+#color-control{
+    display: flex;
+    justify-content:left;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#color-descriptor{
+    align-content: center;
+}
+
+.tou, .ulo, .tr{
+    display: flex;
+    align-items: center;
+
+    p{
+        min-width: 490px;
+        margin: 0;
+    }
+}
