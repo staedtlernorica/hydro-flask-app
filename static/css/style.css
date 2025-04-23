@@ -146,20 +146,26 @@ p{
     margin-bottom: 150px; */
 }
 
+#chart-container{
+    min-height: 200px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-wrap: wrap;
+    position: relative;
+}
+
 #chart{
     display: flex;
     justify-content: center;
     margin: 25px;
 }
-
 #chart-control{
     text-align: center;
     display: flex;
     justify-content: space-around;
     padding: 0 30%;
 }
-
-
 input[type="color" i]{
     padding: 0;
     border: 0;
@@ -167,7 +173,6 @@ input[type="color" i]{
     height: 50px;
     margin: 0 5px;
 }
-
 #color-setup{
     display: flex;
     justify-content: space-between;
@@ -184,18 +189,15 @@ input[type="color" i]{
         max-height: 25px;
     }
 }
-
 #color-control{
     display: flex;
     justify-content:left;
     align-items: center;
     margin-bottom: 15px;
 }
-
 #color-descriptor{
     align-content: center;
 }
-
 .tou, .ulo, .tr{
     display: flex;
     align-items: center;
@@ -207,15 +209,16 @@ input[type="color" i]{
 }
 
 #loader-container{
-    height: 200px;
+    /* height: 200px; */
     display: flex;
-    justify-content: center;
-    align-content: center;
-    flex-wrap: wrap;
+align-self: center;
+    position: absolute;
+    z-index: 2;
 }
 
 
 #loader {
+
     border: 16px solid #005d555a; /* Light grey */
     border-top: 16px solid #005d55; /* Blue */
     border-radius: 50%;

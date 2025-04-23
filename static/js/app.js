@@ -1,6 +1,20 @@
 const LOADING_ANIMATION = false
-const LOADER = document.getElementById("loader")
+const LOADER = document.getElementById("loader-container")
+const CHART = document.getElementById("chart")
 LOADER.style.display = 'none'         //have it upfront for testing purposes
+
+function loadingAnimation(loading){
+    if (loading){
+        LOADER.style.display = 'flex'
+        CHART.style.opacity = '15%'
+        return
+    }
+
+    LOADER.style.display = 'none'
+    CHART.style.opacity = '100%'
+}
+
+
 
 const moreText = document.getElementById("moreText");
 const preview = document.getElementById("preview");
@@ -18,7 +32,7 @@ xmlFile = document.querySelector('#xmlFile')
 xmlSampleFile = '../../sample xml/output.xml'
 
 function handleUploadClick(btnType) {
-    LOADER.style.display = 'block'
+    loadingAnimation(true)
     let uploadUrl = `${window.location.origin}/upload?dataSrc=sample`;  //default to use sample data 
     let formData
     if (btnType === 'submit') {
@@ -53,7 +67,7 @@ function handleUploadClick(btnType) {
 
                 const scripts = chartDiv.querySelectorAll('script');
                 scripts.forEach(script => eval(script.textContent));
-                LOADER.style.display = 'none'
+                loadingAnimation(false)
             })
         .catch(console.error);
 }
@@ -84,7 +98,7 @@ document.getElementById('nextPeriod').addEventListener('click', () => {
 });
 
 function goToPeriod() {
-    LOADER.style.display = 'block'
+    loadingAnimation(true)
     fetch(`${window.location.origin}/queryPeriod?period=${select.value}`, {
         method: 'GET'
     })
@@ -100,7 +114,7 @@ function goToPeriod() {
                         eval(e.textContent);
                     })
                 }
-                LOADER.style.display = 'none'
+                loadingAnimation(false)
             }
         )
         .catch(console.error);
@@ -114,7 +128,7 @@ function changeColorScheme() {
     })
     console.log(colors)
 
-    LOADER.style.display = 'block'
+    loadingAnimation(true)
     fetch(`${window.location.origin}/color`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,7 +149,7 @@ function changeColorScheme() {
                         eval(e.textContent);
                     })
                 }
-                LOADER.style.display = 'none'
+                loadingAnimation(false)
             }
         )
         .catch(console.error);
