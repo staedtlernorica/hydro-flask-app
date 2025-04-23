@@ -2,3 +2,5 @@
 /static/files/*
 !/static/files/.gitkeep
 __pycache__
+
+processed_readings.db
