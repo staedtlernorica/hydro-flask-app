@@ -9,3 +9,5 @@ uploading one file, THEN another file causes dates to appear out of chronologica
 - possibly have dates managed in session/server side and re-index after every upload
 
 handle upload 1, then uploading 2 (vs expecting uploading 1 and 2 at the same time)
+
+remember the color scheme

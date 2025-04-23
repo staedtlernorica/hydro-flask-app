@@ -61,14 +61,9 @@ def upload():
 @app.route('/queryPeriod', methods=["GET", "POST"])
 def queryPeriod(queryPeriod = None, func = False, **kwargs):
     period = queryPeriod or request.args.get('period')  
-    # color = user_color or request.args.get('colorScheme') or col_schemes.schemes['default']
     default_color = col_schemes.schemes['default']
-    conn = sqlite3.connect('processed_readings.db')
-
     color = kwargs.get('user_color', default_color)
-    # print(request.args.get('colorScheme'))
-    print(col_schemes.schemes['default'])
-
+    conn = sqlite3.connect('processed_readings.db')
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
     plot_html = build_viz(queried_df, colorScheme=color)
     if func:
@@ -83,8 +78,6 @@ def color():
     args = request.get_json()
     colors = args['colors']
     period = args['currentPeriod']
-    # print('colirs is', colors)
-    # print('pariod is', period)
     plot_html = queryPeriod(queryPeriod = period, func = True, user_color = colors)
     return {'plot': plot_html}
 

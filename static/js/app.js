@@ -1,3 +1,6 @@
+const LOADING_ANIMATION = false
+const LOADER = document.getElementById("loader")
+
 const moreText = document.getElementById("moreText");
 const preview = document.getElementById("preview");
 const btn = document.querySelector(".toggle-btn");
@@ -14,6 +17,7 @@ xmlFile = document.querySelector('#xmlFile')
 xmlSampleFile = '../../sample xml/output.xml'
 
 function handleUploadClick(btnType) {
+    LOADER.style.visibility = 'visible'
     let uploadUrl = `${window.location.origin}/upload?dataSrc=sample`;  //default to use sample data 
     let formData
     if (btnType === 'submit') {
@@ -28,26 +32,28 @@ function handleUploadClick(btnType) {
         body: formData
     })
         .then(res => res.text())
-        .then(res => {
-            let parsed = JSON.parse(res);
-            const chartDiv = document.getElementById('chart');
-            chartDiv.className = ''
-            chartDiv.innerHTML = parsed['plot'];
-            const periodSelect = document.getElementById('period');
-            periodSelect.innerHTML = ''; // clear previous options if any
+        .then(
+            res => {
+                let parsed = JSON.parse(res);
+                const chartDiv = document.getElementById('chart');
+                chartDiv.className = ''
+                chartDiv.innerHTML = parsed['plot'];
+                const periodSelect = document.getElementById('period');
+                periodSelect.innerHTML = ''; // clear previous options if any
 
-            parsed['month_year'].forEach(value => {
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = value;
-                periodSelect.appendChild(option);
-            });
+                parsed['month_year'].forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    periodSelect.appendChild(option);
+                });
 
-            periodSelect.selectedIndex = periodSelect.options.length - 1;
+                periodSelect.selectedIndex = periodSelect.options.length - 1;
 
-            const scripts = chartDiv.querySelectorAll('script');
-            scripts.forEach(script => eval(script.textContent));
-        })
+                const scripts = chartDiv.querySelectorAll('script');
+                scripts.forEach(script => eval(script.textContent));
+                LOADER.style.visibility = 'hidden'
+            })
         .catch(console.error);
 }
 
@@ -77,6 +83,7 @@ document.getElementById('nextPeriod').addEventListener('click', () => {
 });
 
 function goToPeriod() {
+    LOADER.style.visibility = 'visible'
     fetch(`${window.location.origin}/queryPeriod?period=${select.value}`, {
         method: 'GET'
     })
@@ -92,6 +99,7 @@ function goToPeriod() {
                         eval(e.textContent);
                     })
                 }
+                LOADER.style.visibility = 'hidden'
             }
         )
         .catch(console.error);
@@ -105,6 +113,7 @@ function changeColorScheme() {
     })
     console.log(colors)
 
+    LOADER.style.visibility = 'visible'
     fetch(`${window.location.origin}/color`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -125,6 +134,7 @@ function changeColorScheme() {
                         eval(e.textContent);
                     })
                 }
+                LOADER.style.visibility = 'hidden'
             }
         )
         .catch(console.error);

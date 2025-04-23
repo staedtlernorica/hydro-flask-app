@@ -18,15 +18,16 @@
                 <div class="preview" id="preview">
                     <h3>Quickstart</h3>
                     <p>
-                        On this page, you can upload your Green Button Data or click the <b><em>Use Sample
+                        On this page, you can upload your Green Button Data (or the provided <b><em>Use Sample
                                 Data</em></b>
-                        button to
+                        button) to
                         see a breakdown of how much each electricity pricing plan costs based on your daily energy
                         usage.
                         <b><u>No uploaded data is saved to maintain privacy</u></b>!
                     <div class="more-text" id="moreText">
                         You can get your Green Button data from your hydro provider. For example, I obtained mine from
-                        this <a href="https://www.torontohydro.com/for-home/green-button">Toronto Hydro page</a>.
+                        this <a href="https://www.torontohydro.com/for-home/green-button">Toronto Hydro page</a>, and
+                        other hydro/utilities companies within Ontario most likely also have a similar page.
                         Further
                         information on the electricity pricing plans can be found
                         <a href="https://www.oeb.ca/consumer-information-and-protection/electricity-rates">here</a> on
@@ -40,8 +41,6 @@
             </div>
         </section>
 
-
-        <!-- <br> -->
         <div id="data-source-wrapper">
             <h4>Upload your Green Button Data</h4>
             <div id="data-source">
@@ -53,12 +52,13 @@
                 <div>
                     <input type="button" id="sampleXml" class="sample-data" value="Use Sample Data">
                 </div>
-                <!-- <br> -->
             </div>
         </div>
         {{ plot_html | safe }}
 
-        <div id="chart" class="no-chart"></div>
+        <div id="loader"></div>
+        <div id="chart" class="no-chart">
+        </div>
         <div id="chart-control">
             <button id="prevPeriod">Previous Period</button>
             <div id="period-selector">
