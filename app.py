@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, g, redirect, url_for
+from flask import Flask, render_template, request, jsonify, g, redirect, url_for, make_response
 from flask_wtf import FlaskForm
 from wtforms import MultipleFileField, SubmitField
 from werkzeug.utils import secure_filename
@@ -8,6 +8,7 @@ from viz.extras import merge_files, parse_xml, get_month_year
 from viz.build_viz import build_df, build_viz
 import pandas as pd
 from viz import chart_color_schemes as col_schemes
+import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
@@ -18,6 +19,8 @@ upload_path = f"{os.getcwd()}/{app.config['UPLOAD_FOLDER']}"
 class UploadFileForm(FlaskForm):
     file = MultipleFileField("Files", validators=[InputRequired()])
     submit = SubmitField("Upload Files")
+
+DEFAULT_COLORS_SCHEME = col_schemes.schemes['default']
 
 @app.route('/', methods=['GET',"POST"])
 @app.route('/home', methods=['GET',"POST"])
@@ -31,8 +34,8 @@ def home():
     #     plot_html = build_viz(merged_files)
     #     # return render_template("result.html", plot_html=plot_html)
     # return render_template('index.html', form=form)
-    default_colors = col_schemes.schemes['default']
-    return render_template('index.html', colors = default_colors)
+    COLORS_SCHEME = json.loads(request.cookies.get('custom_colors', json.dumps(DEFAULT_COLORS_SCHEME)))
+    return render_template('index.html', colors = COLORS_SCHEME)
 
 
 @app.route('/upload', methods=["POST"])
@@ -51,7 +54,9 @@ def upload():
     
     month_year_list = get_month_year(parsed_xml)
     latest_period = month_year_list[-1]
-    plot_html = queryPeriod(queryPeriod = latest_period, func = True)
+    COLORS_SCHEME = json.loads(request.cookies.get('custom_colors', json.dumps(DEFAULT_COLORS_SCHEME)))
+
+    plot_html = queryPeriod(queryPeriod = latest_period, func = True, user_color = COLORS_SCHEME)
     return {'date': 'Last 30 days',
             'month_year': month_year_list,
             'plot': plot_html}
@@ -61,10 +66,14 @@ def upload():
 @app.route('/queryPeriod', methods=["GET", "POST"])
 def queryPeriod(queryPeriod = None, func = False, **kwargs):
     period = queryPeriod or request.args.get('period')  
-    default_color = col_schemes.schemes['default']
-    color = kwargs.get('user_color', default_color)
+    # color = 0
+    if func:
+        color = kwargs.get('user_color', DEFAULT_COLORS_SCHEME)
+    else:
+        color = json.loads(request.cookies.get('custom_colors', json.dumps(DEFAULT_COLORS_SCHEME)))
     conn = sqlite3.connect('processed_readings.db')
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
+
     plot_html = build_viz(queried_df, colorScheme=color)
     if func:
         return plot_html
@@ -79,7 +88,9 @@ def color():
     colors = args['colors']
     period = args['currentPeriod']
     plot_html = queryPeriod(queryPeriod = period, func = True, user_color = colors)
-    return {'plot': plot_html}
+    resp = make_response({'plot': plot_html})  # Wrap your existing return value
+    resp.set_cookie('custom_colors', json.dumps(colors))
+    return resp
 
 @app.route('/test', methods=["GET", "POST"])
 def test():
