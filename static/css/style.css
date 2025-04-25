@@ -64,7 +64,7 @@ footer {
 
 h1 {
     color: #333;
-    margin-right: 25px;
+    margin: 10px 25px 10px 0;
     min-width: 220px;
     width: 400px;
 }
@@ -77,18 +77,18 @@ p{
     margin-top: 0;
 }
 
-.content-wrapper {
+.contentWrapper {
     font-family: Arial, sans-serif;
 }
 
-.more-text {
+.moreText {
     max-height: 500px;
     opacity: 1;
     overflow: hidden;
     transition: opacity 0.5s ease, max-height 0.5s ease;
 }
 
-.more-text.hide {
+.moreText.hide {
     max-height: 0;
     opacity: 0;
 }
@@ -114,7 +114,7 @@ p{
     opacity: 0.6;
 }
 
-.toggle-btn {
+.toggleBtn {
     color: blue;
     cursor: pointer;
     user-select: none;
@@ -122,31 +122,26 @@ p{
     display: inline-block;
 }
 
-.toggle-container {
+.toggleContainer {
     text-align: right;
     margin-top: 5px;
 }
 
-#data-source-wrapper{
+#dataSourceWrapper{
     display: flex;
 }
 
-#data-source{
+#dataSource{
     display: flex;
 }
 
-#data-source div{
+#dataSource div{
     margin: 0 40px 0 30px;
     display: flex;
     align-items: center;
 }
 
-#chart.no-chart{
-    /* margin-top: 150px;
-    margin-bottom: 150px; */
-}
-
-#chart-container{
+#chartContainer{
     min-height: 200px;
     display: flex;
     justify-content: center;
@@ -160,7 +155,7 @@ p{
     justify-content: center;
     margin: 25px;
 }
-#chart-control{
+#chartControl{
     text-align: center;
     display: flex;
     justify-content: space-around;
@@ -173,7 +168,7 @@ input[type="color" i]{
     height: 50px;
     margin: 0 5px;
 }
-#color-setup{
+#colorSetup{
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -189,15 +184,25 @@ input[type="color" i]{
         max-height: 25px;
     }
 }
-#color-control{
+#colorControl{
     display: flex;
     justify-content:left;
     align-items: center;
     margin-bottom: 15px;
+
+    button, select{
+        margin-right: 50px;
+    }
+
+    label{
+        margin-right: 15px;
+    }
+
+    select{
+        padding: 0 5px;
+    }
 }
-#color-descriptor{
-    align-content: center;
-}
+
 .tou, .ulo, .tr{
     display: flex;
     align-items: center;
@@ -208,7 +213,7 @@ input[type="color" i]{
     }
 }
 
-#loader-container{
+#loaderContainer{
     /* height: 200px; */
     display: flex;
 align-self: center;

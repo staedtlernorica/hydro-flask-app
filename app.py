@@ -35,7 +35,13 @@ def home():
     #     # return render_template("result.html", plot_html=plot_html)
     # return render_template('index.html', form=form)
     COLORS_SCHEME = json.loads(request.cookies.get('custom_colors', json.dumps(DEFAULT_COLORS_SCHEME)))
-    return render_template('index.html', colors = COLORS_SCHEME)
+    # HAS_CUSTOM_COLORS_SCHEME
+    print(DEFAULT_COLORS_SCHEME)
+    custom_colors = json.loads(request.cookies.get('custom_colors', '[]'))
+
+    print(custom_colors)
+    # return render_template('index.html', colors = COLORS_SCHEME)
+    return render_template('index.html', colors = COLORS_SCHEME, has_custom_colors = custom_colors)
 
 
 @app.route('/upload', methods=["POST"])
@@ -87,10 +93,20 @@ def color():
     args = request.get_json()
     colors = args['colors']
     period = args['currentPeriod']
-    plot_html = queryPeriod(queryPeriod = period, func = True, user_color = colors)
-    resp = make_response({'plot': plot_html})  # Wrap your existing return value
+    resp = None
+    if period == 'empty':
+        resp = make_response('')  # Wrap your existing return value
+    elif period != 'empty':
+        plot_html = queryPeriod(queryPeriod = period, func = True, user_color = colors)
+        resp = make_response({'plot': plot_html})  # Wrap your existing return value
+
     resp.set_cookie('custom_colors', json.dumps(colors))
     return resp
+
+@app.route('/presetColor', methods=["GET", "POST"])
+def presetColor():
+
+    return ''
 
 @app.route('/test', methods=["GET", "POST"])
 def test():

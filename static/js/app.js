@@ -1,7 +1,7 @@
 const LOADING_ANIMATION = false
-const LOADER = document.getElementById("loader-container")
 const CHART = document.getElementById("chart")
-LOADER.style.display = 'none'         //have it upfront for testing purposes
+const LOADER = document.getElementById("loaderContainer")
+LOADER.style.display = 'none'
 
 function loadingAnimation(loading){
     if (loading){
@@ -9,16 +9,13 @@ function loadingAnimation(loading){
         CHART.style.opacity = '15%'
         return
     }
-
     LOADER.style.display = 'none'
     CHART.style.opacity = '100%'
 }
 
-
-
 const moreText = document.getElementById("moreText");
 const preview = document.getElementById("preview");
-const btn = document.querySelector(".toggle-btn");
+const btn = document.querySelector(".toggleBtn");
 
 function toggleText() {
     moreText.classList.toggle("hide");
@@ -78,28 +75,28 @@ submitBtn.onclick = () => handleUploadClick('submit');
 sampleBtn.onclick = () => handleUploadClick('sample');
 
 
-const select = document.getElementById('period');
-select.addEventListener('change', () => {
+const TIME_PERIOD_SELECT = document.getElementById('period');
+TIME_PERIOD_SELECT.addEventListener('change', () => {
     goToPeriod()
 });
 
 document.getElementById('prevPeriod').addEventListener('click', () => {
-    if (select.selectedIndex > 0) {
-        select.selectedIndex -= 1;
+    if (TIME_PERIOD_SELECT.selectedIndex > 0) {
+        TIME_PERIOD_SELECT.selectedIndex -= 1;
         goToPeriod()
     }
 });
 
 document.getElementById('nextPeriod').addEventListener('click', () => {
-    if (select.selectedIndex < select.options.length - 1) {
-        select.selectedIndex += 1;
+    if (TIME_PERIOD_SELECT.selectedIndex < TIME_PERIOD_SELECT.options.length - 1) {
+        TIME_PERIOD_SELECT.selectedIndex += 1;
         goToPeriod()
     }
 });
 
 function goToPeriod() {
     loadingAnimation(true)
-    fetch(`${window.location.origin}/queryPeriod?period=${select.value}`, {
+    fetch(`${window.location.origin}/queryPeriod?period=${TIME_PERIOD_SELECT.value}`, {
         method: 'GET'
     })
         .then(res => res.text())
@@ -126,7 +123,11 @@ function changeColorScheme() {
     colorSelectors.forEach((e) => {
         colors.push(e.value);
     })
-    console.log(colors)
+    
+    // send in 'empty' so /color function only set custom color cookies
+    // and doesn't query time period/create chart, saving rendering time
+    periodIsEmpty = TIME_PERIOD_SELECT.value === ''
+    period = TIME_PERIOD_SELECT.value
 
     loadingAnimation(true)
     fetch(`${window.location.origin}/color`, {
@@ -134,23 +135,29 @@ function changeColorScheme() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             colors: colors,
-            currentPeriod: select.value
+            currentPeriod: periodIsEmpty ? 'empty' : period
         })
     })
         .then(res => res.text())
         .then(
             res => {
-                x = JSON.parse(res)
-                chartDiv = document.getElementById('chart')
-                chartDiv.innerHTML = x['plot'];
-                const scripts = chartDiv.querySelectorAll('script');
-                if (scripts) {
-                    scripts.forEach((e) => {
-                        eval(e.textContent);
-                    })
+                if (!periodIsEmpty){
+                    x = JSON.parse(res)
+                    chartDiv = document.getElementById('chart')
+                    chartDiv.innerHTML = x['plot'];
+                    const scripts = chartDiv.querySelectorAll('script');
+                    if (scripts) {
+                        scripts.forEach((e) => {
+                            eval(e.textContent);
+                        })
+                    }
                 }
                 loadingAnimation(false)
             }
         )
         .catch(console.error);
+}
+
+function resetColorScheme(){
+
 }
