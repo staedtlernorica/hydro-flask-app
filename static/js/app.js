@@ -118,11 +118,12 @@ function goToPeriod() {
 }
 
 function changeColorScheme() {
-    const colors = [];
+    let colors = [];
     const colorSelectors = document.querySelectorAll(`.colorSelector`)
     colorSelectors.forEach((e) => {
         colors.push(e.value);
     })
+    colors = colors.join('|')
     
     // send in 'empty' so /color function only set custom color cookies
     // and doesn't query time period/create chart, saving rendering time

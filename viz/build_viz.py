@@ -218,20 +218,14 @@ def build_viz(period_data, **kwargs):
     pp_values = ['tou: off-peak', 'tou: mid-peak', 'tou: on-peak',
         'ulo: ultra-low', 'ulo: off-peak', 'ulo: mid-peak', 'ulo: on-peak',
         'tr: lower', 'tr: higher',]
-    
-    col = ['red', 'orange', 'brown',
-           'blue', 'navy', 'green', 'olive',
-           'grey', 'black']
-    
+    colors = kwargs['colorScheme'].split('|')
     fig = px.histogram(period_data, 
                     x='Plan', 
                     y='Prices ($)', 
                     facet_col='date (ET)', 
                     facet_col_spacing=0.0155, 
                     color='Price Period', 
-                    # color_discrete_sequence = color_schemes['default'],
-                    # color_discrete_map = dict(zip(pp_values, color_schemes['default'])),
-                    color_discrete_map = dict(zip(pp_values, kwargs['colorScheme'])),
+                    color_discrete_map = dict(zip(pp_values, colors)),
                     barmode='stack',  
                     labels = {'Plan': ''},  # got from https://stackoverflow.com/a/63439845/6030118
                     width=1300,

@@ -88,20 +88,20 @@
                 </div>
                 <div class="tou">
                     <p>TOU: Off-Peak, Mid-Peak, On-Peak </p>
-                    {% for i in range(1,4) %}
-                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors[i - 1]}}">
+                    {% for i in range(0,3) %}
+                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors.split('|')[i]}}">
                     {% endfor %}
                 </div>
                 <div class="ulo">
                     <p>ULO: Ultra Low Overnight, Weekend Off-Peak, Mid-Peak, On-Peak</p>
-                    {% for i in range(4,8) %}
-                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors[i - 1]}}">
+                    {% for i in range(3,7) %}
+                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors.split('|')[i]}}">
                     {% endfor %}
                 </div>
                 <div class="tr">
                     <p>TR: Tier 1, Tier 2</p>
-                    {% for i in range(8,10) %}
-                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors[i - 1]}}">
+                    {% for i in range(7,9) %}
+                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors.split('|')[i]}}">
                     {% endfor %}
                 </div>
             </div>

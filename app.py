@@ -34,14 +34,9 @@ def home():
     #     plot_html = build_viz(merged_files)
     #     # return render_template("result.html", plot_html=plot_html)
     # return render_template('index.html', form=form)
-    COLORS_SCHEME = json.loads(request.cookies.get('custom_colors', json.dumps(DEFAULT_COLORS_SCHEME)))
-    # HAS_CUSTOM_COLORS_SCHEME
-    print(DEFAULT_COLORS_SCHEME)
-    custom_colors = json.loads(request.cookies.get('custom_colors', '[]'))
-
-    print(custom_colors)
-    # return render_template('index.html', colors = COLORS_SCHEME)
-    return render_template('index.html', colors = COLORS_SCHEME, has_custom_colors = custom_colors)
+    COLORS_SCHEME = request.cookies.get('custom_colors', DEFAULT_COLORS_SCHEME)
+    has_custom_colors = COLORS_SCHEME != DEFAULT_COLORS_SCHEME
+    return render_template('index.html', colors = COLORS_SCHEME, has_custom_colors = has_custom_colors)
 
 
 @app.route('/upload', methods=["POST"])
@@ -57,11 +52,9 @@ def upload():
     df = build_df(parsed_xml) 
     conn = sqlite3.connect('processed_readings.db')
     df.to_sql('readings', conn, if_exists='replace', index=False)
-    
     month_year_list = get_month_year(parsed_xml)
     latest_period = month_year_list[-1]
-    COLORS_SCHEME = json.loads(request.cookies.get('custom_colors', json.dumps(DEFAULT_COLORS_SCHEME)))
-
+    COLORS_SCHEME = request.cookies.get('custom_colors', DEFAULT_COLORS_SCHEME)
     plot_html = queryPeriod(queryPeriod = latest_period, func = True, user_color = COLORS_SCHEME)
     return {'date': 'Last 30 days',
             'month_year': month_year_list,
@@ -71,15 +64,13 @@ def upload():
 
 @app.route('/queryPeriod', methods=["GET", "POST"])
 def queryPeriod(queryPeriod = None, func = False, **kwargs):
-    period = queryPeriod or request.args.get('period')  
-    # color = 0
-    if func:
+    period = queryPeriod or request.args.get('period')
+    if func:    # from inside view function, in app.py ()
         color = kwargs.get('user_color', DEFAULT_COLORS_SCHEME)
-    else:
-        color = json.loads(request.cookies.get('custom_colors', json.dumps(DEFAULT_COLORS_SCHEME)))
+    else:       # from URL query params, in JS
+        color = request.cookies.get('custom_colors', DEFAULT_COLORS_SCHEME)
     conn = sqlite3.connect('processed_readings.db')
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
-
     plot_html = build_viz(queried_df, colorScheme=color)
     if func:
         return plot_html
@@ -87,9 +78,6 @@ def queryPeriod(queryPeriod = None, func = False, **kwargs):
 
 @app.route('/color', methods=["GET", "POST"])
 def color():
-    # print('the request is', request.get_json())
-    # g.chartColors = request.get_json().get('colors')
-    # g.color = 
     args = request.get_json()
     colors = args['colors']
     period = args['currentPeriod']
@@ -100,7 +88,7 @@ def color():
         plot_html = queryPeriod(queryPeriod = period, func = True, user_color = colors)
         resp = make_response({'plot': plot_html})  # Wrap your existing return value
 
-    resp.set_cookie('custom_colors', json.dumps(colors))
+    resp.set_cookie('custom_colors', colors)
     return resp
 
 @app.route('/presetColor', methods=["GET", "POST"])
