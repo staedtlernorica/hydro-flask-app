@@ -20,7 +20,8 @@ class UploadFileForm(FlaskForm):
     file = MultipleFileField("Files", validators=[InputRequired()])
     submit = SubmitField("Upload Files")
 
-DEFAULT_COLORS_SCHEME = col_schemes.schemes['default']
+DEFAULT_COLORS_SCHEME = col_schemes.schemes['Default']
+COLORS_SCHEMES_OBJ = col_schemes.schemes
 
 @app.route('/', methods=['GET',"POST"])
 @app.route('/home', methods=['GET',"POST"])
@@ -34,9 +35,17 @@ def home():
     #     plot_html = build_viz(merged_files)
     #     # return render_template("result.html", plot_html=plot_html)
     # return render_template('index.html', form=form)
-    COLORS_SCHEME = request.cookies.get('custom_colors', DEFAULT_COLORS_SCHEME)
-    has_custom_colors = COLORS_SCHEME != DEFAULT_COLORS_SCHEME
-    return render_template('index.html', colors = COLORS_SCHEME, has_custom_colors = has_custom_colors)
+    CUSTOM_COLORS_SCHEME = request.cookies.get('custom_colors', DEFAULT_COLORS_SCHEME)
+    has_custom_colors = CUSTOM_COLORS_SCHEME != DEFAULT_COLORS_SCHEME
+    if has_custom_colors:
+            COLORS_SCHEMES_OBJ['Custom'] = CUSTOM_COLORS_SCHEME
+
+    print(CUSTOM_COLORS_SCHEME)
+    print(COLORS_SCHEMES_OBJ)
+    return render_template('index.html', 
+                           has_custom_colors = has_custom_colors,
+                           colors = CUSTOM_COLORS_SCHEME, 
+                           colors_list = COLORS_SCHEMES_OBJ)
 
 
 @app.route('/upload', methods=["POST"])
@@ -54,7 +63,7 @@ def upload():
     df.to_sql('readings', conn, if_exists='replace', index=False)
     month_year_list = get_month_year(parsed_xml)
     latest_period = month_year_list[-1]
-    COLORS_SCHEME = request.cookies.get('custom_colors', DEFAULT_COLORS_SCHEME)
+    COLORS_SCHEME = request.cookies.get('custom_colors', None)
     plot_html = queryPeriod(queryPeriod = latest_period, func = True, user_color = COLORS_SCHEME)
     return {'date': 'Last 30 days',
             'month_year': month_year_list,
@@ -68,7 +77,7 @@ def queryPeriod(queryPeriod = None, func = False, **kwargs):
     if func:    # from inside view function, in app.py ()
         color = kwargs.get('user_color', DEFAULT_COLORS_SCHEME)
     else:       # from URL query params, in JS
-        color = request.cookies.get('custom_colors', DEFAULT_COLORS_SCHEME)
+        color = request.cookies.get('custom_colors', None)
     conn = sqlite3.connect('processed_readings.db')
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
     plot_html = build_viz(queried_df, colorScheme=color)

@@ -61,7 +61,7 @@
                 <div id="loader"></div>
             </div>
             <div id="chart" class="noChart">
-        </div>
+            </div>
         </div>
         <div id="chartControl">
             <button id="prevPeriod">Previous Period</button>
@@ -72,43 +72,100 @@
             <button id="nextPeriod">Next Period</button>
         </div>
 
+        {% set period_names = ['Off-Peak', 'Mid-Peak', 'On-Peak',
+        'Ultra Low Overnight', 'Weekend Off-Peak', 'Mid-Peak', 'On-Peak',
+        'Tier 1', 'Tier 2'] %}
         <div id="colorSetup">
-            <div id="colorSelection">
-                <div id="colorControl">
-                    <h4>Choose color for electricity plan and period:</h4>
-                    <button onclick="changeColorScheme()">Submit Color Scheme</button>
-                    <label for="alt col scheme">Preset Schemes</label>
-                    <select name="alt col scheme" id="colorSchemeSelect">
-                        <option value="default">Default</option>
-                        <option value="alt_1">Alternate 1</option>
-                        <option value="alt_2">Alternate 2</option>
-                        <option value="custom" {% if has_custom_colors == True %}selected{% endif %}>Custom</option>
-                    </select>
-                    <button onclick="resetColorScheme()">Reset Color Scheme</button>
+            <div id="colorDescription">
+                <h4>Choose color for electricity plan and period:</h4>
+                <button id="colorModeSwitch" value="preset">Switch to Preset Mode</button>
+            </div>
+            <div id="presetColorsOption">
+
+                <div id="planNames">
+                    <h4 class="tou">Time of Use</h4>
+                    <h4 class="ulo">Ultra Low Overnight</h4>
+                    <h4 class="tr">Tiered Rates</h4>
                 </div>
-                <div class="tou">
-                    <p>TOU: Off-Peak, Mid-Peak, On-Peak </p>
+                <div class="periodNames">
                     {% for i in range(0,3) %}
-                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors.split('|')[i]}}">
+                    <div class="item">
+                        <p class="">{{period_names[i]}}</p>
+                    </div>
                     {% endfor %}
-                </div>
-                <div class="ulo">
-                    <p>ULO: Ultra Low Overnight, Weekend Off-Peak, Mid-Peak, On-Peak</p>
                     {% for i in range(3,7) %}
-                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors.split('|')[i]}}">
+                    <div class="item">
+                        <p class="">{{period_names[i]}}</p>
+                    </div>
+                    {% endfor %}
+                    {% for i in range(7,9) %}
+                    <div class="item">
+                        <p class="">{{period_names[i]}}</p>
+                    </div>
                     {% endfor %}
                 </div>
-                <div class="tr">
-                    <p>TR: Tier 1, Tier 2</p>
-                    {% for i in range(7,9) %}
-                    <input type="color" class="colorSelector" name="color{{i}}" value="{{colors.split('|')[i]}}">
+                <div class="preset selectorsContainer">
+                    {% for i in range(0,3) %}
+                    <div class="item">
+                        <input type="color" class="tou preset colorSelector" name="color{{i}}"
+                            value="{{colors.split('|')[i]}}">
+                    </div>
                     {% endfor %}
+                    {% for i in range(3,7) %}
+                    <div class="item">
+                        <input type="color" class="ulo preset colorSelector" name="color{{i}}"
+                            value="{{colors.split('|')[i]}}">
+                    </div>
+                    {% endfor %}
+                    {% for i in range(7,9) %}
+                    <div class="item">
+                        <input type="color" class="tr preset colorSelector" name="color{{i}}"
+                            value="{{colors.split('|')[i]}}">
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="item" id="presetColorControl">
+                    <label for="alt col scheme">Preset Schemes</label>
+                    <select class="preset" name="alt col scheme" id="colorSchemeSelect" onchange="assignColorScheme({{colors_list}}[this.value]),
+                                        toggleCustomColorsSubmitBtn(this.value)">
+                        <option value="Default">Default</option>
+                        <option value="Alternate 1">Alternate 1</option>
+                        <option value="Alternate 2">Alternate 2</option>
+                        <option value="Custom" {% if has_custom_colors==True %}selected{% endif %}>Custom</option>
+                    </select>
+                    <button class="preset" id="submitPresetColor" onclick="changeColorScheme()">Use Preset
+                        Scheme</button>
+                </div>
+                <div class="custom selectorsContainer" disabled>
+                    {% for i in range(0,3) %}
+                    <div class="item">
+                        <input type="color" class="tou custom colorSelector" name="color{{i}}"
+                            value="{{colors.split('|')[i]}}" disabled>
+                    </div>
+                    {% endfor %}
+                    {% for i in range(3,7) %}
+                    <div class="item">
+                        <input type="color" class="ulo custom colorSelector" name="color{{i}}"
+                            value="{{colors.split('|')[i]}}" disabled>
+                    </div>
+                    {% endfor %}
+                    {% for i in range(7,9) %}
+                    <div class="item">
+                        <input type="color" class="tr custom colorSelector" name="color{{i}}"
+                            value="{{colors.split('|')[i]}}" disabled>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="item" id="customColorControl">
+                    <button id="submitCustomColor" class="custom" disabled>Use Chosen Colors</button>
                 </div>
             </div>
+
         </div>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script src="../static/js/app.js"></script>
+    </div>
     </div>
 </body>
 
