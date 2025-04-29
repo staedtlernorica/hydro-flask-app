@@ -76,10 +76,7 @@
         'Ultra Low Overnight', 'Weekend Off-Peak', 'Mid-Peak', 'On-Peak',
         'Tier 1', 'Tier 2'] %}
         <div id="colorSetup">
-            <div id="colorDescription">
-                <h4>Choose color for electricity plan and period:</h4>
-                <button id="colorModeSwitch" value="preset">Switch to Preset Mode</button>
-            </div>
+            <h4>Choose color for electricity plan and period:</h4>
             <div id="presetColorsOption">
 
                 <div id="planNames">
@@ -104,6 +101,9 @@
                     </div>
                     {% endfor %}
                 </div>
+                <!-- <div id="colorSwitchContainer">
+                    <button id="colorModeSwitch" value="preset">Switch to Preset Mode</button>
+                </div> -->
                 <div class="preset selectorsContainer">
                     {% for i in range(0,3) %}
                     <div class="item">
@@ -124,44 +124,53 @@
                     </div>
                     {% endfor %}
                 </div>
-                <div class="item" id="presetColorControl">
-                    <label for="alt col scheme">Preset Schemes</label>
-                    <select class="preset" name="alt col scheme" id="colorSchemeSelect" onchange="assignColorScheme({{colors_list}}[this.value]),
-                                        toggleCustomColorsSubmitBtn(this.value)">
-                        <option value="Default">Default</option>
-                        <option value="Alternate 1">Alternate 1</option>
-                        <option value="Alternate 2">Alternate 2</option>
+                <div class="" id="presetColorControl">
+                    <label for="alt col scheme">Select Schemes:</label>
+                    <br>
+                    <select class="preset" name="alt col scheme" id="colorSchemeSelect"
+                        onchange="assignColorScheme({{colors_list}}[this.value])">
+                        <option class="preset" value="Default">Default</option>
+                        <option class="preset" value="Alternate 1">Alternate 1</option>
+                        <option class="preset" value="Alternate 2">Alternate 2</option>
                         <option value="Custom" {% if has_custom_colors==True %}selected{% endif %}>Custom</option>
                     </select>
-                    <button class="preset" id="submitPresetColor" onclick="changeColorScheme()">Use Preset
+                    <button class="preset" id="submitPresetColor" onclick="changeColorScheme()">Use
                         Scheme</button>
                 </div>
-                <div class="custom selectorsContainer" disabled>
+                <div class="custom selectorsContainer">
                     {% for i in range(0,3) %}
                     <div class="item">
                         <input type="color" class="tou custom colorSelector" name="color{{i}}"
-                            value="{{colors.split('|')[i]}}" disabled>
+                            value="{{colors.split('|')[i]}}">
                     </div>
                     {% endfor %}
                     {% for i in range(3,7) %}
                     <div class="item">
                         <input type="color" class="ulo custom colorSelector" name="color{{i}}"
-                            value="{{colors.split('|')[i]}}" disabled>
+                            value="{{colors.split('|')[i]}}">
                     </div>
                     {% endfor %}
                     {% for i in range(7,9) %}
                     <div class="item">
                         <input type="color" class="tr custom colorSelector" name="color{{i}}"
-                            value="{{colors.split('|')[i]}}" disabled>
+                            value="{{colors.split('|')[i]}}">
                     </div>
                     {% endfor %}
                 </div>
-                <div class="item" id="customColorControl">
-                    <button id="submitCustomColor" class="custom" disabled>Use Chosen Colors</button>
+                <div class="" id="customColorControl">
+                    <!-- <button id="copyCurrentPreset">Copy Current Preset Scheme</button> -->
+                    <input type="text" name="" id="customSchemeName" placeholder="Name for custom color scheme" required>
+                    <br>
+                    <button id="submitCustomColor" class="custom" onclick="createCustomScheme()">Create Custom
+                        Scheme</button>
                 </div>
             </div>
 
         </div>
+
+        <footer>
+
+        </footer>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script src="../static/js/app.js"></script>

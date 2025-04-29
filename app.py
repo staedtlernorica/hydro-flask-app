@@ -40,8 +40,6 @@ def home():
     if has_custom_colors:
             COLORS_SCHEMES_OBJ['Custom'] = CUSTOM_COLORS_SCHEME
 
-    print(CUSTOM_COLORS_SCHEME)
-    print(COLORS_SCHEMES_OBJ)
     return render_template('index.html', 
                            has_custom_colors = has_custom_colors,
                            colors = CUSTOM_COLORS_SCHEME, 
@@ -100,9 +98,13 @@ def color():
     resp.set_cookie('custom_colors', colors)
     return resp
 
-@app.route('/presetColor', methods=["GET", "POST"])
-def presetColor():
+@app.route('/createColorScheme', methods=["GET", "POST"])
+def createColorScheme():
 
+    args = request.get_json()
+    new_scheme_name = args['new_scheme_name']
+    new_scheme = args['new_scheme'].split('|')
+    print(new_scheme_name, new_scheme)
     return ''
 
 @app.route('/test', methods=["GET", "POST"])

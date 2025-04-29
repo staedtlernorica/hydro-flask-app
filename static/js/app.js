@@ -118,8 +118,9 @@ function goToPeriod() {
 }
 
 function changeColorScheme() {
+    const css_selector = `.preset.colorSelector`
     let colors = [];
-    const colorSelectors = document.querySelectorAll(`.colorSelector`)
+    const colorSelectors = document.querySelectorAll(css_selector)
     colorSelectors.forEach((e) => {
         colors.push(e.value);
     })
@@ -159,9 +160,6 @@ function changeColorScheme() {
         .catch(console.error);
 }
 
-function resetColorScheme() {
-}
-
 // changes colors of color box when a color scheme is selected
 const COLOR_SELECTORS = document.querySelectorAll('input.colorSelector')
 function assignColorScheme(e) {
@@ -173,50 +171,28 @@ function assignColorScheme(e) {
     }
 }
 
-// const 
-const CUSTOM_COLOR_OPTION = document.getElementById('colorSchemeSelect')
-const SUBMIT_CUSTOM_COLOR_BTN = document.getElementById('customColorsSubmit')
-function toggleCustomColorsSubmitBtn(e) {
-    console.log(e)
-    if (CUSTOM_COLOR_OPTION.value === 'custom') {
-        SUBMIT_CUSTOM_COLOR_BTN.disabled = false;
-    } else {
-        SUBMIT_CUSTOM_COLOR_BTN.disabled = true;
-    }
+
+
+const CUSTOM_COLOR_SELECTORS = document.querySelectorAll('.custom.colorSelector')
+const CUSTOM_SCHEME_NAME = document.getElementById('customSchemeName')
+function createCustomScheme() {
+    var custom_colors = []
+    CUSTOM_COLOR_SELECTORS.forEach(e => {
+        custom_colors.push(e.value)
+    })
+    colors_string = custom_colors.join('|');
+
+    fetch(`${window.location.origin}/createColorScheme`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            new_scheme_name: CUSTOM_SCHEME_NAME.value,
+            new_scheme: colors_string
+        })
+    })
+        .then(res => res.text())
+        .then(
+            loadingAnimation(false)
+        )
+        .catch(console.error);
 }
-
-function controlCustomColorSubmit() {
-    return
-}
-
-// const CUSTOM_COLOR_OPTION = document.querySelector('select#colorSchemeSelect option[value="Custom"]')
-// CUSTOM_COLOR_OPTION.addEventListener('change', () => {
-//     goToPeriod()
-// });
-
-const COLOR_SWITCH_BUTTON = document.querySelector('button#colorModeSwitch');
-COLOR_SWITCH_BUTTON.addEventListener('click', () => {
-    COLOR_SWITCH_BUTTON.value = COLOR_SWITCH_BUTTON.value === 'preset' ? 'custom' : 'preset';
-    COLOR_SWITCH_BUTTON.textContent = COLOR_SWITCH_BUTTON.value === 'preset' ? 'Switch to Custom Mode' :
-        'Switch to Preset Mode';
-
-    const customEls = document.querySelectorAll('.custom')
-    const presetEls = document.querySelectorAll('.preset')
-    if (COLOR_SWITCH_BUTTON.value === 'preset') {
-        customEls.forEach(el => {
-            el.disabled = true
-        })
-        presetEls.forEach(el => {
-            el.disabled = false
-        })
-
-    } else {
-        presetEls.forEach(el => {
-            el.disabled = true
-        })
-        customEls.forEach(el => {
-            el.disabled = false
-        })
-    }
-
-});

@@ -40,8 +40,6 @@ nav ul li a:hover {
 
     max-width: 1300px;
     padding: 0;
-    /* padding-right: 10px;
-    padding-left: 10px; */
 }
 
 #intro {
@@ -51,16 +49,6 @@ nav ul li a:hover {
 main {
     padding: 20px;
     text-align: center;
-}
-
-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
 }
 
 h1 {
@@ -184,7 +172,7 @@ input[type="color"]:disabled {
     /* justify-content: space-between;
     /* align-items: center; */
     /* margin-top: 55px; */
-    grid-template-columns: 800px 175px;
+    grid-template-columns: 800px 250px;
     grid-template-rows: 30px 60px 60px 60px;
 
     h4 {
@@ -275,8 +263,8 @@ input[type="color"]:disabled {
 
 #presetColorControl {
     grid-column: 2/3;
-    grid-row: 2/4;
-    display: flex;
+    grid-row: 3/4;
+    /* display: flex; */
     flex-direction: column;
     justify-content: flex-end;
     align-items: flex-start;
@@ -289,7 +277,7 @@ input[type="color"]:disabled {
 #customColorControl {
     grid-column: 2/3;
     grid-row: 4/5;
-    display: flex;
+    /* display: flex; */
     /* flex-direction: column; */
     /* justify-content: left; */
     align-items: center;
@@ -326,4 +314,8 @@ input[type="color"]:disabled {
     100% {
         transform: rotate(360deg);
     }
+}
+
+footer{
+    height: 100px;
 }
