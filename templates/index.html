@@ -85,17 +85,7 @@
                     <h4 class="tr">Tiered Rates</h4>
                 </div>
                 <div class="periodNames">
-                    {% for i in range(0,3) %}
-                    <div class="item">
-                        <p class="">{{period_names[i]}}</p>
-                    </div>
-                    {% endfor %}
-                    {% for i in range(3,7) %}
-                    <div class="item">
-                        <p class="">{{period_names[i]}}</p>
-                    </div>
-                    {% endfor %}
-                    {% for i in range(7,9) %}
+                    {% for i in range(0,9) %}
                     <div class="item">
                         <p class="">{{period_names[i]}}</p>
                     </div>
@@ -105,21 +95,16 @@
                     <button id="colorModeSwitch" value="preset">Switch to Preset Mode</button>
                 </div> -->
                 <div class="preset selectorsContainer">
-                    {% for i in range(0,3) %}
+                    {% for i in range(0, 9) %}
+                    {% if i <= 3 %}
+                    {% set class = 'tou' %}
+                    {% elif 3< i <= 7 %}
+                    {% set class = 'ulo' %}
+                    {% else %}
+                    {% set class = 'tr' %}
+                    {% endif %}
                     <div class="item">
-                        <input type="color" class="tou preset colorSelector" name="color{{i}}"
-                            value="{{colors.split('|')[i]}}">
-                    </div>
-                    {% endfor %}
-                    {% for i in range(3,7) %}
-                    <div class="item">
-                        <input type="color" class="ulo preset colorSelector" name="color{{i}}"
-                            value="{{colors.split('|')[i]}}">
-                    </div>
-                    {% endfor %}
-                    {% for i in range(7,9) %}
-                    <div class="item">
-                        <input type="color" class="tr preset colorSelector" name="color{{i}}"
+                        <input type="color" class="{{class}} preset colorSelector" name="color{{i}}"
                             value="{{colors.split('|')[i]}}">
                     </div>
                     {% endfor %}
@@ -138,28 +123,24 @@
                         Scheme</button>
                 </div>
                 <div class="custom selectorsContainer">
-                    {% for i in range(0,3) %}
+                    {% for i in range(0, 9) %}
+                    {% if i <= 3 %}
+                    {% set class = 'tou' %}
+                    {% elif 3< i <= 7 %}
+                    {% set class = 'ulo' %}
+                    {% else %}
+                    {% set class = 'tr' %}
+                    {% endif %}
                     <div class="item">
-                        <input type="color" class="tou custom colorSelector" name="color{{i}}"
-                            value="{{colors.split('|')[i]}}">
-                    </div>
-                    {% endfor %}
-                    {% for i in range(3,7) %}
-                    <div class="item">
-                        <input type="color" class="ulo custom colorSelector" name="color{{i}}"
-                            value="{{colors.split('|')[i]}}">
-                    </div>
-                    {% endfor %}
-                    {% for i in range(7,9) %}
-                    <div class="item">
-                        <input type="color" class="tr custom colorSelector" name="color{{i}}"
+                        <input type="color" class="{{class}} custom colorSelector" name="color{{i}}"
                             value="{{colors.split('|')[i]}}">
                     </div>
                     {% endfor %}
                 </div>
                 <div class="" id="customColorControl">
                     <!-- <button id="copyCurrentPreset">Copy Current Preset Scheme</button> -->
-                    <input type="text" name="" id="customSchemeName" placeholder="Name for custom color scheme" required>
+                    <input type="text" name="" id="customSchemeName" placeholder="Name for custom color scheme"
+                        required>
                     <br>
                     <button id="submitCustomColor" class="custom" onclick="createCustomScheme()">Create Custom
                         Scheme</button>
