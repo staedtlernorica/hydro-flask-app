@@ -94,6 +94,9 @@
                 <!-- <div id="colorSwitchContainer">
                     <button id="colorModeSwitch" value="preset">Switch to Preset Mode</button>
                 </div> -->
+                <script>
+                    const default_colors = {{ colors_list | tojson }};
+                </script>
                 <div class="preset selectorsContainer">
                     {% for i in range(0, 9) %}
                     {% if i <= 3 %}
@@ -105,9 +108,11 @@
                     {% endif %}
                     <div class="item">
                         <input type="color" class="{{class}} preset colorSelector" name="color{{i}}"
-                            value="{{colors.split('|')[i]}}">
+                        value="{{colors[i]}}">
                     </div>
                     {% endfor %}
+                    <!-- {% print(colors_list) %}
+                    {% print(type(colors_list)) %} -->
                 </div>
                 <div class="" id="presetColorControl">
                     <label for="alt col scheme">Select Schemes:</label>
@@ -133,7 +138,7 @@
                     {% endif %}
                     <div class="item">
                         <input type="color" class="{{class}} custom colorSelector" name="color{{i}}"
-                            value="{{colors.split('|')[i]}}">
+                            value="{{colors[i]}}">
                     </div>
                     {% endfor %}
                 </div>

@@ -40,10 +40,16 @@ def home():
     if has_custom_colors:
             COLORS_SCHEMES_OBJ['Custom'] = CUSTOM_COLORS_SCHEME
 
+    print(type(CUSTOM_COLORS_SCHEME))
+    print((CUSTOM_COLORS_SCHEME))
+    print(type(COLORS_SCHEMES_OBJ))
+    print((COLORS_SCHEMES_OBJ))
+
     return render_template('index.html', 
                            has_custom_colors = has_custom_colors,
                            colors = CUSTOM_COLORS_SCHEME, 
-                           colors_list = COLORS_SCHEMES_OBJ)
+                           colors_list = COLORS_SCHEMES_OBJ,
+                           type = type)
 
 
 @app.route('/upload', methods=["POST"])
@@ -73,12 +79,13 @@ def upload():
 def queryPeriod(queryPeriod = None, func = False, **kwargs):
     period = queryPeriod or request.args.get('period')
     if func:    # from inside view function, in app.py ()
+        print(DEFAULT_COLORS_SCHEME)
         color = kwargs.get('user_color', DEFAULT_COLORS_SCHEME)
     else:       # from URL query params, in JS
         color = request.cookies.get('custom_colors', None)
     conn = sqlite3.connect('processed_readings.db')
     queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
-    plot_html = build_viz(queried_df, colorScheme=color)
+    plot_html = build_viz(queried_df, color_scheme=color, default_color_scheme=DEFAULT_COLORS_SCHEME)
     if func:
         return plot_html
     return {'plot': plot_html}
@@ -95,6 +102,8 @@ def color():
         plot_html = queryPeriod(queryPeriod = period, func = True, user_color = colors)
         resp = make_response({'plot': plot_html})  # Wrap your existing return value
 
+    print(colors)
+
     resp.set_cookie('custom_colors', colors)
     return resp
 
@@ -103,7 +112,7 @@ def createColorScheme():
 
     args = request.get_json()
     new_scheme_name = args['new_scheme_name']
-    new_scheme = args['new_scheme'].split('|')
+    new_scheme = args['new_scheme']
     print(new_scheme_name, new_scheme)
     return ''
 

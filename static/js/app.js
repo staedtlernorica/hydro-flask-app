@@ -124,7 +124,7 @@ function changeColorScheme() {
     colorSelectors.forEach((e) => {
         colors.push(e.value);
     })
-    colors = colors.join('|')
+    // colors = colors.join('|')
 
     // send in 'empty' so /color function only set custom color cookies
     // and doesn't query time period/create chart, saving rendering time
@@ -164,7 +164,8 @@ function changeColorScheme() {
 const COLOR_SELECTORS = document.querySelectorAll('input.colorSelector')
 function assignColorScheme(e) {
     console.log(e)
-    colors_list = e.split('|')
+    // colors_list = e.split('|')
+    colors_list = e
     console.log(colors_list)
     for (i = 0; i < colors_list.length; i++) {
         COLOR_SELECTORS[i].value = colors_list[i]
@@ -180,7 +181,7 @@ function createCustomScheme() {
     CUSTOM_COLOR_SELECTORS.forEach(e => {
         custom_colors.push(e.value)
     })
-    colors_string = custom_colors.join('|');
+    colors_string = custom_colors;
 
     fetch(`${window.location.origin}/createColorScheme`, {
         method: 'POST',

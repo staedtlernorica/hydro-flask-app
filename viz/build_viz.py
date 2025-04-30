@@ -218,7 +218,9 @@ def build_viz(period_data, **kwargs):
     pp_values = ['tou: off-peak', 'tou: mid-peak', 'tou: on-peak',
         'ulo: ultra-low', 'ulo: off-peak', 'ulo: mid-peak', 'ulo: on-peak',
         'tr: lower', 'tr: higher',]
-    colors = kwargs['colorScheme'].split('|')
+    # colors = kwargs['colorScheme'].split('|')
+    print(kwargs)
+    colors = kwargs['color_scheme'] or kwargs['default_color_scheme']
     fig = px.histogram(period_data, 
                     x='Plan', 
                     y='Prices ($)', 
