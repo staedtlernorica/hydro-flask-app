@@ -1,7 +1,15 @@
-/.venv
-/static/files/*
-!/static/files/.gitkeep
-/__pycache__
-__pycache__
-/viz/__pycache__
+# Virtual environments
+/.venv/
+/venv/
+
+# Static files (ignore everything except .gitkeep)
+static/files/*
+!static/files/.gitkeep
+
+# Python cache
+__pycache__/
+*/__pycache__/
+viz/__pycache__/
+
+# SQLite DB file
 processed_readings.db
