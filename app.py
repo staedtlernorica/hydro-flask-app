@@ -1,72 +1,124 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify, g, redirect, url_for, make_response
 from flask_wtf import FlaskForm
 from wtforms import MultipleFileField, SubmitField
 from werkzeug.utils import secure_filename
-import os
+import os, sqlite3
 from wtforms.validators import InputRequired
+from viz.extras import merge_files, parse_xml, get_month_year
+from viz.build_viz import build_df, build_viz
+import pandas as pd
+from viz import chart_color_schemes as col_schemes
+import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
 app.config['UPLOAD_FOLDER'] = 'static/files'
 app.config['ALLOWED_EXTENSIONS'] = {'xml'}
+upload_path = f"{os.getcwd()}/{app.config['UPLOAD_FOLDER']}"
 
 class UploadFileForm(FlaskForm):
     file = MultipleFileField("Files", validators=[InputRequired()])
     submit = SubmitField("Upload Files")
+
+DEFAULT_COLORS_SCHEME = col_schemes.schemes['Default']
+COLORS_SCHEMES_OBJ = col_schemes.schemes
 
 @app.route('/', methods=['GET',"POST"])
 @app.route('/home', methods=['GET',"POST"])
 def home():
     # form = UploadFileForm()
     # if form.validate_on_submit():
-    #     file = form.file.data # First grab the file
-    #     file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['UPLOAD_FOLDER'],secure_filename(file.filename))) # Then save the file
-
-    #     import xmltodict
-    #     with open(app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
-    #         data_dict = xmltodict.parse(xml_file.read())
-    #         return data_dict
-        
-    #     return "File has been uploaded."
-    
+    #     for file in form.file.data:
+    #         secured_filename = secure_filename(file.filename)
+    #         file.save(f'{upload_path}/{secured_filename}')
+    #         merged_files = merge_files(upload_path)
+    #     plot_html = build_viz(merged_files)
+    #     # return render_template("result.html", plot_html=plot_html)
     # return render_template('index.html', form=form)
-    form = UploadFileForm()
-    if form.validate_on_submit():
-        
-        import xmltodict, json
-        files_filenames = []
-        merged_files = []
-        for file in form.file.data:
-            file_filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-            # files_filenames.append(file_filename)
+    CUSTOM_COLORS_SCHEME = request.cookies.get('custom_colors', DEFAULT_COLORS_SCHEME)
+    has_custom_colors = CUSTOM_COLORS_SCHEME != DEFAULT_COLORS_SCHEME
+    if has_custom_colors:
+            COLORS_SCHEMES_OBJ['Custom'] = CUSTOM_COLORS_SCHEME
 
-            with open(app.config['UPLOAD_FOLDER'] + '/' + file.filename) as xml_file:
-                data_dict = xmltodict.parse(xml_file.read())
-                json_data = json.dumps(data_dict)
+    print(type(CUSTOM_COLORS_SCHEME))
+    print((CUSTOM_COLORS_SCHEME))
+    print(type(COLORS_SCHEMES_OBJ))
+    print((COLORS_SCHEMES_OBJ))
 
-                for i in range(4, len(data_dict['feed']['entry'])):
-                    metadata = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:interval']
-                    readings = data_dict['feed']['entry'][i]['content']['espi:IntervalBlock']['espi:IntervalReading']
-                    day_start = metadata['espi:start']
+    return render_template('index.html', 
+                           has_custom_colors = has_custom_colors,
+                           colors = CUSTOM_COLORS_SCHEME, 
+                           colors_list = COLORS_SCHEMES_OBJ,
+                           type = type)
 
-                    for hourly_readings in readings:       
-                        reading_start = hourly_readings['espi:timePeriod']['espi:start']
-                        reading_value = hourly_readings['espi:value']
-                        merged_files.append({
-                            'day (unix)': day_start,
-                            'hour (unix)': reading_start,
-                            'reading': reading_value
-                        })
 
-            # return merged_files
+@app.route('/upload', methods=["POST"])
+def upload():
+    dataSrc = request.args.get('dataSrc')
+    import xmltodict
+    if dataSrc == 'submit':
+        xml = xmltodict.parse(request.files['file'].stream.read())
+    elif dataSrc == 'sample':
+        with open(f'{os.getcwd()}/sample xml/sample.xml', 'r', encoding='utf-8') as file:
+            xml = xmltodict.parse(file.read())
+    parsed_xml = parse_xml(xml)
+    df = build_df(parsed_xml) 
+    conn = sqlite3.connect('processed_readings.db')
+    df.to_sql('readings', conn, if_exists='replace', index=False)
+    month_year_list = get_month_year(parsed_xml)
+    latest_period = month_year_list[-1]
+    COLORS_SCHEME = request.cookies.get('custom_colors', None)
+    plot_html = queryPeriod(queryPeriod = latest_period, func = True, user_color = COLORS_SCHEME)
+    return {'date': 'Last 30 days',
+            'month_year': month_year_list,
+            'plot': plot_html}
 
-        from viz import build_viz
+# print([print(i) for i in os.environ])
 
-        return build_viz.build_viz(merged_files)
+@app.route('/queryPeriod', methods=["GET", "POST"])
+def queryPeriod(queryPeriod = None, func = False, **kwargs):
+    period = queryPeriod or request.args.get('period')
+    if func:    # from inside view function, in app.py ()
+        print(DEFAULT_COLORS_SCHEME)
+        color = kwargs.get('user_color', DEFAULT_COLORS_SCHEME)
+    else:       # from URL query params, in JS
+        color = request.cookies.get('custom_colors', None)
+    conn = sqlite3.connect('processed_readings.db')
+    queried_df = pd.read_sql_query("SELECT * FROM readings WHERE [Year-Month] = ?", params=(period,), con=conn)
+    plot_html = build_viz(queried_df, color_scheme=color, default_color_scheme=DEFAULT_COLORS_SCHEME)
+    if func:
+        return plot_html
+    return {'plot': plot_html}
 
-    
-    return render_template('index.html', form=form)
+@app.route('/color', methods=["GET", "POST"])
+def color():
+    args = request.get_json()
+    colors = args['colors']
+    period = args['currentPeriod']
+    resp = None
+    if period == 'empty':
+        resp = make_response('')  # Wrap your existing return value
+    elif period != 'empty':
+        plot_html = queryPeriod(queryPeriod = period, func = True, user_color = colors)
+        resp = make_response({'plot': plot_html})  # Wrap your existing return value
+
+    print(colors)
+
+    resp.set_cookie('custom_colors', colors)
+    return resp
+
+@app.route('/createColorScheme', methods=["GET", "POST"])
+def createColorScheme():
+
+    args = request.get_json()
+    new_scheme_name = args['new_scheme_name']
+    new_scheme = args['new_scheme']
+    print(new_scheme_name, new_scheme)
+    return ''
+
+@app.route('/test', methods=["GET", "POST"])
+def test():
+    return 'test is success'
 
 if __name__ == '__main__':
     app.run(debug=True)

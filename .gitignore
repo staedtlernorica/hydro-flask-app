@@ -1,2 +1,7 @@
 /.venv
+/static/files/*
+!/static/files/.gitkeep
+/__pycache__
 __pycache__
+/viz/__pycache__
+processed_readings.db

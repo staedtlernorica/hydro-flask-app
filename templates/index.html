@@ -1,18 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/style.css">
     <title>Home</title>
-</head>
-<body>
-    <h1>Flask File Uploads Tutorial</h1>
 
-    <form method='POST' enctype='multipart/form-data'>
-        {{form.hidden_tag()}}
-        {{form.file()}}
-        {{form.submit()}}
-    </form>
+</head>
+
+<body>
+    <div class="wrapper">
+        <section id="intro">
+            <h1>Ontario Hydro Plan Comparison</h1>
+            <div class="contentWrapper">
+                <div class="preview" id="preview">
+                    <h3>Quickstart</h3>
+                    <p>
+                        On this page, you can upload your Green Button Data (or the provided <b><em>Use Sample
+                                Data</em></b>
+                        button) to
+                        see a breakdown of how much each electricity pricing plan costs based on your daily energy
+                        usage.
+                        <b><u>No uploaded data is saved to maintain privacy</u></b>!
+                    <div class="moreText" id="moreText">
+                        You can get your Green Button data from your hydro provider. For example, I obtained mine from
+                        this <a href="https://www.torontohydro.com/for-home/green-button">Toronto Hydro page</a>, and
+                        other hydro/utilities companies within Ontario most likely also have a similar page.
+                        Further
+                        information on the electricity pricing plans can be found
+                        <a href="https://www.oeb.ca/consumer-information-and-protection/electricity-rates">here</a> on
+                        the Ontario Electricity Board website.
+                        </p>
+                    </div>
+                </div>
+                <div class="toggleContainer">
+                    <span class="toggleBtn" onclick="toggleText()">See Less</span>
+                </div>
+            </div>
+        </section>
+
+        <div id="dataSourceWrapper">
+            <h4>Upload your Green Button Data</h4>
+            <div id="dataSource">
+                <div>
+                    <input type="file" id="xmlFile" name="" accept="xml" multiple />
+                    <input type="submit" id="submitXml" class="user-data" value="Submit File(s)">
+                </div>
+                <h4>or</h4>
+                <div>
+                    <input type="button" id="sampleXml" class="sample-data" value="Use Sample Data">
+                </div>
+            </div>
+        </div>
+        {{ plot_html | safe }}
+
+        <div id="chartContainer">
+            <div id="loaderContainer">
+                <div id="loader"></div>
+            </div>
+            <div id="chart" class="noChart">
+            </div>
+        </div>
+        <div id="chartControl">
+            <button id="prevPeriod">Previous Period</button>
+            <div id="periodSelector">
+                <label for="period">Choose period:</label>
+                <select name="period" id="period"></select>
+            </div>
+            <button id="nextPeriod">Next Period</button>
+        </div>
+
+        {% set period_names = ['Off-Peak', 'Mid-Peak', 'On-Peak',
+        'Ultra Low Overnight', 'Weekend Off-Peak', 'Mid-Peak', 'On-Peak',
+        'Tier 1', 'Tier 2'] %}
+        <div id="colorSetup">
+            <h4>Choose color for electricity plan and period:</h4>
+            <div id="presetColorsOption">
+
+                <div id="planNames">
+                    <h4 class="tou">Time of Use</h4>
+                    <h4 class="ulo">Ultra Low Overnight</h4>
+                    <h4 class="tr">Tiered Rates</h4>
+                </div>
+                <div class="periodNames">
+                    {% for i in range(0,9) %}
+                    <div class="item">
+                        <p class="">{{period_names[i]}}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <!-- <div id="colorSwitchContainer">
+                    <button id="colorModeSwitch" value="preset">Switch to Preset Mode</button>
+                </div> -->
+                <script>
+                    const default_colors = {{ colors_list | tojson }};
+                </script>
+                <div class="preset selectorsContainer">
+                    {% for i in range(0, 9) %}
+                    {% if i <= 3 %}
+                    {% set class = 'tou' %}
+                    {% elif 3< i <= 7 %}
+                    {% set class = 'ulo' %}
+                    {% else %}
+                    {% set class = 'tr' %}
+                    {% endif %}
+                    <div class="item">
+                        <input type="color" class="{{class}} preset colorSelector" name="color{{i}}"
+                        value="{{colors[i]}}">
+                    </div>
+                    {% endfor %}
+                    <!-- {% print(colors_list) %}
+                    {% print(type(colors_list)) %} -->
+                </div>
+                <div class="" id="presetColorControl">
+                    <label for="alt col scheme">Select Schemes:</label>
+                    <br>
+                    <select class="preset" name="alt col scheme" id="colorSchemeSelect"
+                        onchange="assignColorScheme({{colors_list}}[this.value])">
+                        <option class="preset" value="Default">Default</option>
+                        <option class="preset" value="Alternate 1">Alternate 1</option>
+                        <option class="preset" value="Alternate 2">Alternate 2</option>
+                        <option value="Custom" {% if has_custom_colors==True %}selected{% endif %}>Custom</option>
+                    </select>
+                    <button class="preset" id="submitPresetColor" onclick="changeColorScheme()">Use
+                        Scheme</button>
+                </div>
+                <div class="custom selectorsContainer">
+                    {% for i in range(0, 9) %}
+                    {% if i <= 3 %}
+                    {% set class = 'tou' %}
+                    {% elif 3< i <= 7 %}
+                    {% set class = 'ulo' %}
+                    {% else %}
+                    {% set class = 'tr' %}
+                    {% endif %}
+                    <div class="item">
+                        <input type="color" class="{{class}} custom colorSelector" name="color{{i}}"
+                            value="{{colors[i]}}">
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="" id="customColorControl">
+                    <!-- <button id="copyCurrentPreset">Copy Current Preset Scheme</button> -->
+                    <input type="text" name="" id="customSchemeName" placeholder="Name for custom color scheme"
+                        required>
+                    <br>
+                    <button id="submitCustomColor" class="custom" onclick="createCustomScheme()">Create Custom
+                        Scheme</button>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+
+        </footer>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="../static/js/app.js"></script>
+    </div>
+    </div>
 </body>
+
 </html>

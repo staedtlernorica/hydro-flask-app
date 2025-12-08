@@ -1,0 +1,13 @@
+deferred holiday calculations in build_df
+- cross check holiday and weekend column; if holiday==1 AND weekend==1, push till next monday
+
+problem where month that doesn't have any tr:higher entry won't show the legend
+- at the end of build_viz, add dummy data for tr:higher (add at end to not mess with any analysis/transformation)
+
+uploading one file, THEN another file causes dates to appear out of chronological order (but true to order they were uploaded in)
+- eg 2024-02/2024-03/2024-04, 2023-12/2024-01/2024-02
+- possibly have dates managed in session/server side and re-index after every upload
+
+handle upload 1, then uploading 2 (vs expecting uploading 1 and 2 at the same time)
+
+remember the color scheme

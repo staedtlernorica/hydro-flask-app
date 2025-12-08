@@ -1,4 +1,4 @@
-def build_viz(readings):
+def build_df(readings):
     from .extras import assign_historical_rates, assign_season, assign_rate_plan
     import numpy as np, datetime
     import pandas as pd
@@ -24,6 +24,7 @@ def build_viz(readings):
     df['hour (ET)'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York').dt.hour
     df['weekend'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York').dt.day_of_week
     df['weekend'] = np.where(df['weekend'] < 5, False, True)
+    df['Year-Month'] = pd.to_datetime(df['hour (unix)'], unit='s', utc=True).dt.tz_convert('America/New_York').dt.strftime('%Y-%m')
    
     # get list of holiday dates to create a holiday column, as holidays affect TOU and ULO rates
     import holidays
@@ -108,24 +109,7 @@ def build_viz(readings):
     # nest_asyncio.apply()
 
     import datetime
-    first_timestamp = datetime.datetime.fromtimestamp(df['hour (unix)'].min())
-    last_timestamp = datetime.datetime.fromtimestamp(df['hour (unix)'].max())
 
-    from .historical_weather_data import get_historical_weather
-    wdf = get_historical_weather(first_timestamp, last_timestamp)
-
-    # import sqlite3
-    # weather_db = sqlite3.connect('toronto_weather.db')
-    # wdf = pd.read_sql_query("SELECT * FROM `weather data`", weather_db)
-    # weather_db.close()
-
-    temp_column_header = list(wdf)[9] #grab entry b/c copy/paste the string doesn't work
-    # linearly interpolate missing temp data points, and marks if the data is interpolated or not
-    # in future check for multiple large chunks of interpolated data points (>3 consecutive)
-    temp_col = wdf[temp_column_header]
-    # df['interpolated temp'] = temp_col.isnull()
-    df_tou['temp (C)'] = temp_col.interpolate()
-    df_ulo['temp (C)'] = temp_col.interpolate()
     df_tr = df.copy(deep=True)
     tr_dates = list(oeb_rates['tr'].keys())
     tr_plan = oeb_rates['tr']
@@ -146,7 +130,6 @@ def build_viz(readings):
     df_tr.insert(len(df_tr.columns) - 1, 'Cumulative Usage (kWh)', df_tr.pop('Cumulative Usage (kWh)'))
     df_tr.insert(len(df_tr.columns) - 1, 'TR Threshold', df_tr.pop('TR Threshold'))
 
-    df_tr['temp (C)'] = temp_col.interpolate()
     # longer method but more explicit/clear
     # find id of rows where starting cumulative usages < threshold AND ending cumulative usage > above threshold, ie where readings 
     # started with a lower rate but crosses the TR threshold and ends with a higher rate; then split those readings into two rows: 
@@ -188,10 +171,10 @@ def build_viz(readings):
     higher_crossover['Prices (c)'] = higher_crossover[["Rate (c)"]].multiply(higher_crossover["usage (kWh)"], axis="index").round(2)
     higher_crossover['Price Period'] = 'tr: higher'
     df_tr.iloc[higher_crossover_index] = higher_crossover
-    print(crossover_readings)
-    print(lower_crossover_index, higher_crossover_index)
-    print(lower_crossover)
-    print(higher_crossover)
+    # print(crossover_readings)
+    # print(lower_crossover_index, higher_crossover_index)
+    # print(lower_crossover)
+    # print(higher_crossover)
 
 
     dfa = pd.concat([df_ulo, df_tou], axis=0)
@@ -208,31 +191,47 @@ def build_viz(readings):
 
     dfa['Prices (c)'] = (dfa['Prices (c)']/100).round(2)
     dfa.rename(columns={'Prices (c)': 'Prices ($)'}, inplace=True)
-    test = dfa[dfa['date (ET)'] >= datetime.date(2024, 7, 1)]
-    test = dfa[dfa['date (ET)'] <= datetime.date(2024, 7, 31)]
-    test.reset_index(drop=True, inplace=True)
-    # test = test[test['date (ET)'] == datetime.date(2023, 7, 3)]
+
+    # now that we have ALL rates plan for TOU/ULO/TR; do this b/c sqlite3 can't handle tuples
+    dfa['Rates Plan'] = dfa['Rates Plan'].astype('str')
+    
+    # for testing purposes to obscure TOU/ULO/TR values
+    # dfa['Price Period'].replace({
+    #     'tou: off-peak': "low 1",
+    #     'tou: mid-peak': "low 2",
+    #     'tou: on-peak': "low 3",
+    #     'ulo: ultra-low': "mid 1",
+    #     'ulo: off-peak': "mid 2",
+    #     'ulo: mid-peak': "mid 3",
+    #     'ulo: on-peak': "mid 4",
+    #     'tr: lower': "high 1",
+    #     'tr: higher': "high 2",
+    # }, inplace = True)
+    
+    return dfa
 
 
+def build_viz(period_data, **kwargs):
     import plotly.express as px
-
-    testa = test[(test['date (ET)'] >= datetime.date(2024, 7, 1)) & 
-                (test['date (ET)'] <= datetime.date(2024, 7, 31))]
-
-    col_scheme_1 = ["#0aceff", "#0a7cff", "#0230e8", "#d18feb", "#b057d4", "#8aa3b8", "#bac2bc", "#4b4d4b","#282928"]
-    col_scheme_2 = ['#41ff70', '#fcff39', '#d85521', '#8503ff', '#2d037c', '#0cede6', '#1eb73a', '#ffd51a', '#ff0000'] 
-    alt_scheme = ["teal", "green", "olive", "#F17FB7", "#D14081", "#8BDAE4", "#2E96F0", "#0173FF", "#1E1B76"]
-    placeholder_scheme = ["", "", "", "", "", "", "", "", ""]
     # Create a side-by-side bar chart
-    fig = px.histogram(testa, 
+    # Price Period values
+    pp_values = ['tou: off-peak', 'tou: mid-peak', 'tou: on-peak',
+        'ulo: ultra-low', 'ulo: off-peak', 'ulo: mid-peak', 'ulo: on-peak',
+        'tr: lower', 'tr: higher',]
+    # colors = kwargs['colorScheme'].split('|')
+    print(kwargs)
+    colors = kwargs['color_scheme'] or kwargs['default_color_scheme']
+    fig = px.histogram(period_data, 
                     x='Plan', 
                     y='Prices ($)', 
                     facet_col='date (ET)', 
                     facet_col_spacing=0.0155, 
                     color='Price Period', 
-                    color_discrete_sequence = col_scheme_1,
+                    color_discrete_map = dict(zip(pp_values, colors)),
                     barmode='stack',  
                     labels = {'Plan': ''},  # got from https://stackoverflow.com/a/63439845/6030118
+                    width=1300,
+                    height=450
                     )
     # fig.show()
 
@@ -246,18 +245,18 @@ def build_viz(readings):
     # fig.for_each_annotation(lambda a: print(dir(a)))
     # fig.for_each_annotation(lambda a: print(type(a)))
 
-    # fig.update_layout(
-    #     xaxis_title='X Axis Label',
-    #     xaxis_title_standoff=90,
-    # )
+    fig.update_layout(
+        yaxis_title='Sum of Daily Prices ($)',
+        # xaxis_title_standoff=90,
+    )
 
     fig.update_layout(
                 title={
                 'text' : 'Energy Plans Price Comparison',
                 'x':0.5,
-                'y':1,
+                'y':0.985,
                 'yanchor': "top",
-                'xanchor': "center",
+                'xanchor': "center",  
             })
 
     fig.update_layout(legend=dict(
@@ -268,13 +267,28 @@ def build_viz(readings):
         # x=-1
     ))
 
-    fig.update_layout(
-        autosize = False,
-        height = 600
-    )
+    fig.update_layout({
+        'plot_bgcolor': '#f0f0f0',
+        'paper_bgcolor': '#f0f0f0',
+    })
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(showgrid=False)
 
-    fig.show()
-    # return fig
+    config = {'displayModeBar': False}
+
+    # fig.show(config = config)
+
+    # print(fig.layout.width)
+
+    return fig.to_html(full_html=False)
+
+    # fig = px.histogram(testa, x=testa['date (ET)'], y='Prices ($)', color='Price Period', barmode='group',)
+    # fig.show()
+
+
+    # fig = px.histogram(testa, x=testa['date (ET)'], y='Prices ($)', color='Price Period', barmode='group', histfunc='sum')
+    # fig.show()    
+
 
 if __name__ == "__main__":
     # build_viz()
